@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.34916.146
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeBanking", "HomeBanking.csproj", "{9AD3ED36-191E-45F4-B233-2264F2987DCA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9AD3ED36-191E-45F4-B233-2264F2987DCA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AD3ED36-191E-45F4-B233-2264F2987DCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9AD3ED36-191E-45F4-B233-2264F2987DCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9AD3ED36-191E-45F4-B233-2264F2987DCA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {74CFF1E6-4D0B-4165-8518-8ED0BCE82418}
+	EndGlobalSection
+EndGlobal
