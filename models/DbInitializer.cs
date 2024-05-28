@@ -20,10 +20,25 @@ namespace HomeBanking.Models
                 };
 
                 context.Clients.AddRange(clients);
-
-                //guardamos
-                context.SaveChanges();
             }
+
+            //escribir logica de ingreso de datos de accounts
+            if (!context.Accounts.Any()) {
+
+                var accountGet = context.Clients.FirstOrDefault(c => c.Email == "agustin@gmail.com");
+
+                if (accountGet != null)
+                {
+                    var accounts = new Account[]
+                    {
+                        new Account { Number = "VN001", Balance = 250000, ClientId = accountGet.Id, CreationDate = DateTime.Now },
+                        new Account { Number = "VN002", Balance = 450000, ClientId = accountGet.Id, CreationDate = DateTime.Now }
+                    };
+                    context.Accounts.AddRange(accounts);
+                }
+            }
+            //guardamos
+            context.SaveChanges();
 
         }
     }
