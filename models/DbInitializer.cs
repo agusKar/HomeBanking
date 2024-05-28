@@ -1,8 +1,9 @@
 ﻿using HomeBanking.models;
+using HomeBanking.Models;
 using System;
 using System.Linq;
 
-namespace HomeBankingMindHub.Models
+namespace HomeBanking.Models
 {
     public class DBInitializer
     {

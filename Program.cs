@@ -1,5 +1,5 @@
 using HomeBanking.models;
-using HomeBankingMindHub.Models;
+using HomeBanking.Models;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
