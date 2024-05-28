@@ -1,7 +1,7 @@
 ﻿using HomeBanking.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace HomeBanking.models
+namespace HomeBanking.Models
 {
     public class HomeBankingContext : DbContext
     {

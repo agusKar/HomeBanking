@@ -1,5 +1,4 @@
-﻿using HomeBanking.models;
-using HomeBanking.Models;
+﻿using HomeBanking.Models;
 using System;
 using System.Linq;
 
