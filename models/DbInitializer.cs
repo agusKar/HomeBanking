@@ -1,8 +1,4 @@
-﻿using HomeBanking.Models;
-using System;
-using System.Linq;
-
-namespace HomeBanking.Models
+﻿namespace HomeBanking.Models
 {
     public class DBInitializer
     {
@@ -20,25 +16,43 @@ namespace HomeBanking.Models
                 };
 
                 context.Clients.AddRange(clients);
+                //guardamos
+                context.SaveChanges();
             }
 
             //escribir logica de ingreso de datos de accounts
             if (!context.Accounts.Any()) {
 
-                var accountGet = context.Clients.FirstOrDefault(c => c.Email == "agustin@gmail.com");
+                var clientGet = context.Clients.FirstOrDefault(c => c.Email == "agustin@gmail.com");
 
-                if (accountGet != null)
+                if (clientGet != null)
                 {
                     var accounts = new Account[]
                     {
-                        new Account { Number = "VN001", Balance = 250000, ClientId = accountGet.Id, CreationDate = DateTime.Now },
-                        new Account { Number = "VN002", Balance = 450000, ClientId = accountGet.Id, CreationDate = DateTime.Now }
+                        new Account { Number = "VN001", Balance = 250000, ClientId = clientGet.Id, CreationDate = DateTime.Now },
+                        new Account { Number = "VN002", Balance = 450000, ClientId = clientGet.Id, CreationDate = DateTime.Now }
                     };
                     context.Accounts.AddRange(accounts);
+                    //guardamos
+                    context.SaveChanges();
                 }
             }
-            //guardamos
-            context.SaveChanges();
+            if (!context.Transactions.Any())
+            {
+                var accountGet = context.Accounts.FirstOrDefault(a => a.Number == "VN001");
+                if(accountGet != null)
+                {
+                    var listTransactions = new Transaction[]
+                    {
+                        new Transaction{AccountId = accountGet.Id, Amount = -10000, Description = "Transaccion debitada desde Mercado pago", Type = TransactionType.DEBIT.ToString()},
+                        new Transaction{AccountId = accountGet.Id, Amount = 7000, Description = "Compra en cuotas desde TIENDAMIA", Type = TransactionType.CREDIT.ToString()},
+                        new Transaction{AccountId = accountGet.Id, Amount = -40000, Description = "Compra en tienda ML", Type = TransactionType.DEBIT.ToString()}
+
+                    };
+                    context.Transactions.AddRange(listTransactions);
+                    context.SaveChanges();
+                }
+            }
 
         }
     }

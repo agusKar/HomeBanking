@@ -1,17 +1,16 @@
 ﻿using HomeBanking.DTOs;
 using HomeBanking.Repositories;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HomeBanking.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ClientController : ControllerBase
+    public class ClientsController : ControllerBase
     {
         private readonly IClientRepository _clientRepository;
 
-        public ClientController(IClientRepository clientRepository)
+        public ClientsController(IClientRepository clientRepository)
         {
             _clientRepository = clientRepository;
         }
