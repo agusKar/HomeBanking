@@ -74,6 +74,57 @@ namespace HomeBanking.Migrations
                     b.ToTable("Clients");
                 });
 
+            modelBuilder.Entity("HomeBanking.Models.ClientLoan", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<double>("Amount")
+                        .HasColumnType("float");
+
+                    b.Property<long>("ClientId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("LoanId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Payments")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientId");
+
+                    b.HasIndex("LoanId");
+
+                    b.ToTable("ClientLoans");
+                });
+
+            modelBuilder.Entity("HomeBanking.Models.Loan", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<double>("MaxAmount")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Payments")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Loans");
+                });
+
             modelBuilder.Entity("HomeBanking.Models.Transaction", b =>
                 {
                     b.Property<long>("Id")
@@ -87,6 +138,9 @@ namespace HomeBanking.Migrations
 
                     b.Property<double>("Amount")
                         .HasColumnType("float");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -112,6 +166,25 @@ namespace HomeBanking.Migrations
                     b.Navigation("Cliente");
                 });
 
+            modelBuilder.Entity("HomeBanking.Models.ClientLoan", b =>
+                {
+                    b.HasOne("HomeBanking.Models.Client", "Client")
+                        .WithMany("ClientLoans")
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HomeBanking.Models.Loan", "Loan")
+                        .WithMany("ClientLoans")
+                        .HasForeignKey("LoanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Client");
+
+                    b.Navigation("Loan");
+                });
+
             modelBuilder.Entity("HomeBanking.Models.Transaction", b =>
                 {
                     b.HasOne("HomeBanking.Models.Account", "Account")
@@ -131,6 +204,13 @@ namespace HomeBanking.Migrations
             modelBuilder.Entity("HomeBanking.Models.Client", b =>
                 {
                     b.Navigation("Accounts");
+
+                    b.Navigation("ClientLoans");
+                });
+
+            modelBuilder.Entity("HomeBanking.Models.Loan", b =>
+                {
+                    b.Navigation("ClientLoans");
                 });
 #pragma warning restore 612, 618
         }

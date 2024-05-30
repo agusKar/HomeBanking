@@ -44,14 +44,71 @@
                 {
                     var listTransactions = new Transaction[]
                     {
-                        new Transaction{AccountId = accountGet.Id, Amount = -10000, Description = "Transaccion debitada desde Mercado pago", Type = TransactionType.DEBIT.ToString()},
-                        new Transaction{AccountId = accountGet.Id, Amount = 7000, Description = "Compra en cuotas desde TIENDAMIA", Type = TransactionType.CREDIT.ToString()},
-                        new Transaction{AccountId = accountGet.Id, Amount = -40000, Description = "Compra en tienda ML", Type = TransactionType.DEBIT.ToString()}
+                        new Transaction{AccountId = accountGet.Id, Amount = -10000, Description = "Transaccion debitada desde Mercado pago", Type = TransactionType.DEBIT.ToString(), Date = DateTime.Now.AddMonths(1)},
+                        new Transaction{AccountId = accountGet.Id, Amount = 7000, Description = "Compra en cuotas desde TIENDAMIA", Type = TransactionType.CREDIT.ToString(), Date = DateTime.Now.AddDays(2)},
+                        new Transaction{AccountId = accountGet.Id, Amount = -40000, Description = "Compra en tienda ML", Type = TransactionType.DEBIT.ToString(), Date = DateTime.Now}
 
                     };
                     context.Transactions.AddRange(listTransactions);
                     context.SaveChanges();
                 }
+            }
+            if (!context.Loans.Any())
+            {
+                var loans = new Loan[]
+                {
+                    new Loan { Name = "Hipotecario", MaxAmount = 500000, Payments = "12,24,36,48,60" },
+                    new Loan { Name = "Personal", MaxAmount = 100000, Payments = "6,12,24" },
+                    new Loan { Name = "Automotriz", MaxAmount = 300000, Payments = "6,12,24,36" },
+                };
+                context.Loans.AddRange(loans);
+                context.SaveChanges();
+            }
+
+            //agarrar el client
+            var clientToLoan = context.Clients.FirstOrDefault(c => c.Email == "agustin@gmail.com");
+            if (!context.ClientLoans.Any()) {
+                var loan1 = context.Loans.FirstOrDefault(l => l.Name == "Hipotecario");
+                if (loan1 != null)
+                {
+                    var clientLoan1 = new ClientLoan
+                    {
+                        Amount = 400000,
+                        ClientId = clientToLoan.Id,
+                        LoanId = loan1.Id,
+                        Payments = "60"
+                    };
+                    context.ClientLoans.Add(clientLoan1);
+                }
+
+                var loan2 = context.Loans.FirstOrDefault(l => l.Name == "Personal");
+                if (loan2 != null)
+                {
+                    var clientLoan2 = new ClientLoan
+                    {
+                        Amount = 50000,
+                        ClientId = clientToLoan.Id,
+                        LoanId = loan2.Id,
+                        Payments = "12"
+                    };
+                    context.ClientLoans.Add(clientLoan2);
+                }
+
+                var loan3 = context.Loans.FirstOrDefault(l => l.Name == "Automotriz");
+                if (loan3 != null)
+                {
+                    var clientLoan3 = new ClientLoan
+                    {
+                        Amount = 100000,
+                        ClientId = clientToLoan.Id,
+                        LoanId = loan3.Id,
+                        Payments = "24"
+                    };
+                    context.ClientLoans.Add(clientLoan3);
+                }
+
+                //guardamos todos los prestamos
+                context.SaveChanges();
             }
 
         }

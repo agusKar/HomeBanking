@@ -8,11 +8,13 @@ namespace HomeBanking.DTOs
         public string Type { get; set; }
         public double Amount { get; set; }
         public string Description { get; set; }
+        public DateTime Date { get; set; }
         public TransactionDTO(Transaction transaction)
         {
             Id = transaction.Id;
             Type = transaction.Type;
             Amount = transaction.Amount;
+            Date = transaction.Date;
             Description = transaction.Description;
 
         }
