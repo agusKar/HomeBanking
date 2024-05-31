@@ -6,9 +6,9 @@ var app = new Vue({
     },
     methods:{
         getData: function () {
-            const urlParams = new URLSearchParams(window.location.search);
-            const id = urlParams.get('id');
-            axios.get(`/api/clients/${id}`)
+            //const urlParams = new URLSearchParams(window.location.search);
+            //const id = urlParams.get('id');
+            axios.get(`/api/clients/1`)
             .then(function (response) {
                 //get client ifo
                 app.clientInfo = response.data;

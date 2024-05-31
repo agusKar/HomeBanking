@@ -110,6 +110,49 @@
                 //guardamos todos los prestamos
                 context.SaveChanges();
             }
+            if (!context.Cards.Any())
+            {
+                // Traer el clientId para asignarselo a cada tarjeta nueva creada
+                var clientGet = context.Clients.FirstOrDefault(c => c.Email == "agustin@gmail.com");
+                if (clientGet != null) {
+                    // crear las tarjeta y asignarle el ID a cada una y dsps guardarlas en la entidad
+                    var cardsCollection = new Card[]
+                    {
+                        new Card {
+                            ClientId = clientGet.Id,
+                            CardHolder = clientGet.FirstName + " " + clientGet.LastName,
+                            Type = CardType.DEBIT.ToString(),
+                            Color = CardColor.TITANIUM.ToString(),
+                            Number = "3325-6745-7876-4445",
+                            Cvv = 823,
+                            FromDate= DateTime.Now,
+                            ThruDate= DateTime.Now.AddYears(4)
+                        },
+                        new Card {
+                            ClientId = clientGet.Id,
+                            CardHolder = clientGet.FirstName + " " + clientGet.LastName,
+                            Type = CardType.DEBIT.ToString(),
+                            Color = CardColor.GOLD.ToString(),
+                            Number = "4563-2345-7893-3567",
+                            Cvv = 645,
+                            FromDate= DateTime.Now,
+                            ThruDate= DateTime.Now.AddYears(4)
+                        },
+                        new Card {
+                            ClientId = clientGet.Id,
+                            CardHolder = clientGet.FirstName + " " + clientGet.LastName,
+                            Type = CardType.CREDIT.ToString(),
+                            Color = CardColor.SILVER.ToString(),
+                            Number = "2234-6745-552-7888",
+                            Cvv = 990,
+                            FromDate= DateTime.Now,
+                            ThruDate= DateTime.Now.AddYears(4)
+                        },
+                    };
+                    context.Cards.AddRange(cardsCollection);
+                    context.SaveChanges();
+                }
+            }
 
         }
     }
