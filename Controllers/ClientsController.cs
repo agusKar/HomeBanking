@@ -18,6 +18,7 @@ namespace HomeBanking.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "AdminOnly")]
         public IActionResult GetAllClients() {
             try
             {

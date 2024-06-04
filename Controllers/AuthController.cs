@@ -34,6 +34,11 @@ namespace HomeBanking.Controllers
                     new Claim("Client", user.Email)
                 };
 
+                if (user.Email == "agustin@gmail.com")
+                {
+                    claims.Add(new Claim("Admin", "true"));
+                }
+
                 var claimsIdentity = new ClaimsIdentity(
                     claims,
                     CookieAuthenticationDefaults.AuthenticationScheme
