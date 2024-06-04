@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using HomeBanking.DTOs;
 
 namespace HomeBanking.Controllers
 {
@@ -20,17 +21,17 @@ namespace HomeBanking.Controllers
 
         [HttpPost("login")]
         //Retornará una tarea (Task) de tipo IActionResult, la tarea es una manera que tiene el framework de .Net para representar trabajos que se pueden ejecutar de manera asíncrona
-        public async Task<IActionResult> Login([FromBody] Client client)
+        public async Task<IActionResult> Login([FromBody] LoginDTO LoginDTO)
         {
             try
             {
-                Client user = _clientRepository.FindByEmail(client.Email);
-                if (user == null || !String.Equals(user.Password, client.Password)) {
+                Client user = _clientRepository.FindByEmail(LoginDTO.Email);
+                if (user == null || !String.Equals(user.Password, LoginDTO.Password)) {
                     return Unauthorized();
                 }
                 var claims = new List<Claim>
                 {
-                    new Claim("Client", user.Email),
+                    new Claim("Client", user.Email)
                 };
 
                 var claimsIdentity = new ClaimsIdentity(

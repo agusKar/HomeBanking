@@ -1,6 +1,7 @@
 ﻿using HomeBanking.DTOs;
 using HomeBanking.Models;
 using HomeBanking.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HomeBanking.Controllers
@@ -42,6 +43,7 @@ namespace HomeBanking.Controllers
             }
         }
         [HttpGet("current")]
+        [Authorize(Policy = "ClientOnly")]
         public IActionResult GetCurrent()
         {
             try
@@ -49,14 +51,14 @@ namespace HomeBanking.Controllers
                 string email = User.FindFirst("Client") != null ? User.FindFirst("Client").Value : string.Empty;
                 if (email == string.Empty)
                 {
-                    return Forbid();
+                    return StatusCode(403, "No estas autorizado");
                 }
 
                 Client client = _clientRepository.FindByEmail(email);
 
                 if (client == null)
                 {
-                    return Forbid();
+                    return StatusCode(403, "El cliente no se encontro");
                 }
 
                 var clientDTO = new ClientDTO(client);
@@ -69,16 +71,16 @@ namespace HomeBanking.Controllers
             }
         }
         [HttpPost]
-        public IActionResult Post([FromBody] Client client)
+        public IActionResult Post([FromBody] NewClientDTO newClientDTO)
         {
             try
             {
                 //validamos datos antes
-                if (String.IsNullOrEmpty(client.Email) || String.IsNullOrEmpty(client.Password) || String.IsNullOrEmpty(client.FirstName) || String.IsNullOrEmpty(client.LastName))
+                if (String.IsNullOrEmpty(newClientDTO.Email) || String.IsNullOrEmpty(newClientDTO.Password) || String.IsNullOrEmpty(newClientDTO.FirstName) || String.IsNullOrEmpty(newClientDTO.LastName))
                     return StatusCode(403, "datos inválidos");
 
                 //buscamos si ya existe el usuario
-                Client user = _clientRepository.FindByEmail(client.Email);
+                Client user = _clientRepository.FindByEmail(newClientDTO.Email);
 
                 if (user != null)
                 {
@@ -87,10 +89,10 @@ namespace HomeBanking.Controllers
 
                 Client newClient = new Client
                 {
-                    Email = client.Email,
-                    Password = client.Password,
-                    FirstName = client.FirstName,
-                    LastName = client.LastName,
+                    Email = newClientDTO.Email,
+                    Password = newClientDTO.Password,
+                    FirstName = newClientDTO.FirstName,
+                    LastName = newClientDTO.LastName,
                 };
 
                 _clientRepository.Save(newClient);
