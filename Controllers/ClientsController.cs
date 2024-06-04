@@ -3,6 +3,8 @@ using HomeBanking.Models;
 using HomeBanking.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
+using System.Security.Cryptography;
 
 namespace HomeBanking.Controllers
 {
@@ -11,10 +13,14 @@ namespace HomeBanking.Controllers
     public class ClientsController : ControllerBase
     {
         private readonly IClientRepository _clientRepository;
+        private readonly IAccountRepository _accountRepository;
+        private readonly ICardRepository _cardRepository;
 
-        public ClientsController(IClientRepository clientRepository)
+        public ClientsController(IClientRepository clientRepository, IAccountRepository accountRepository, ICardRepository cardRepository)
         {
             _clientRepository = clientRepository;
+            _accountRepository = accountRepository;
+            _cardRepository = cardRepository;
         }
 
         [HttpGet]
@@ -103,6 +109,191 @@ namespace HomeBanking.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, ex.Message);
+            }
+        }
+
+        //cuenta creada y asignada al cliente autenticado
+        [HttpPost("current/accounts")]
+        public IActionResult CreateAccountToClientAuthenticated()
+        {
+            try
+            {
+                /* 
+                  * traer el cliente autenticado
+                  * verificar si este cliente tiene menos de 3 cuentas sino, devolver 403
+                  * si tiene menos de 3 cuentas crear la cuenta, asignarla al cliente obtenido y guardarla, así como retornar una respuesta “201 creada". tiene que empezar con VIN y seguido de max 8 numeros aleatorios. el saldo de la cuenta tiene que ser 0.
+                */
+                string email = User.FindFirst("Client") != null ? User.FindFirst("Client").Value : string.Empty;
+                if (email == string.Empty)
+                {
+                    return StatusCode(403, "No estas autorizado");
+                }
+
+                Client client = _clientRepository.FindByEmail(email);
+
+                if (client == null)
+                {
+                    return StatusCode(403, "El cliente no se encontro");
+                }
+
+                // traigo todas las cuenta para despues validar si tiene menos de 3
+                var accountsByClient = _accountRepository.GetAccountsByClient(client.Id);
+                Account accountCreate = null;
+                if (accountsByClient.Count() < 3) {
+                    var NumberAccountRandom = RandomNumberGenerator.GetInt32(00000000, 99999999); ;
+                    accountCreate = new Account
+                    {
+                        Number = "VIN-" + NumberAccountRandom.ToString(),
+                        Balance = 0,
+                        CreationDate = DateTime.Now,
+                        ClientId = client.Id
+                    };
+                }
+                else
+                {
+                    return StatusCode(403, "Este cliente llego al máximo de cuentas.");
+                }
+                _accountRepository.SaveAccount(accountCreate);
+                return StatusCode(201, "La cuenta fue creado exitosamente y fue asignada al cliente correctamente.");
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+        }
+        //Traer todas las cuentas del cliente autenticado - JSON con las cuentas de un cliente
+        [HttpGet("current/accounts")]
+        public IActionResult GetAllAccountsByClient()
+        {
+            try
+            {
+                /* 
+                  * traer el cliente autenticado
+                  * traer todas las cuentas de este cliente
+                */
+                string email = User.FindFirst("Client") != null ? User.FindFirst("Client").Value : string.Empty;
+                if (email == string.Empty)
+                {
+                    return StatusCode(403, "No estas autorizado");
+                }
+
+                Client client = _clientRepository.FindByEmail(email);
+
+                if (client == null)
+                {
+                    return StatusCode(403, "El cliente no se encontro");
+                }
+
+                var accountsByClient = _accountRepository.GetAccountsByClient(client.Id);
+
+                var accountsDto = accountsByClient.Select(a => new AccountClientDTO(a)).ToList();
+
+                return Ok(accountsDto);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+        }
+        //tarjeta creada y asignada al cliente autenticado
+        [HttpPost("current/cards")]
+        public IActionResult CreateCardToClientAuthenticated([FromBody] NewCardDTO newCardDTO)
+        {
+            try
+            {
+                /* 
+                  * traer el cliente autenticado
+                  * verificar que tenga menos de 6, 3 credito - 3 debito, sino devuelve 403
+                  * si tiene menos de la condicion crear la tarjeta y asignarla al cliente autenticado.
+                  * La fecha de vencimiento debera ser 5 años despues de la creación.
+                  * También ten en cuenta que los numeros de tarjeta y el cvv se deben generar de forma aleatoria.
+                */
+                string email = User.FindFirst("Client") != null ? User.FindFirst("Client").Value : string.Empty;
+                if (email == string.Empty)
+                {
+                    return StatusCode(403, "No estas autorizado");
+                }
+
+                Client client = _clientRepository.FindByEmail(email);
+
+                if (client == null)
+                {
+                    return StatusCode(403, "El cliente no se encontro");
+                }
+                // validar de que tipo es y cuantas hay en la base de datos, si son menos de 3 de ese tipo crear una nueva si no devolver 403
+                if (_cardRepository.GetAllCardsByType(client.Id, newCardDTO.type).Count() < 3)
+                {
+                    // numero de cvv de 3 digitos aleatorio
+                    var cvvCardRandom = RandomNumberGenerator.GetInt32(000, 999);
+                    // numero de tarjeta de 4 digitos aleatorio (repetir en un form)
+                    var numberCardRandom = "";
+                    for (int i = 0; i < 4; i++)
+                    {
+                        numberCardRandom += RandomNumberGenerator.GetInt32(0000, 9999);
+                        if (i < 3)
+                        {
+                            numberCardRandom += "-";
+                        }
+
+                    }
+                    var newCard = new Card
+                    {
+                        ClientId = client.Id,
+                        CardHolder = client.FirstName + " " + client.LastName,
+                        Color = newCardDTO.color,
+                        Cvv = cvvCardRandom,
+                        FromDate = DateTime.Now,
+                        ThruDate = DateTime.Now.AddYears(5),
+                        Number = numberCardRandom,
+                        Type = newCardDTO.type
+                    };
+
+                    _cardRepository.AddCard(newCard);
+                }
+                else
+                {
+                    return StatusCode(403, $"Intentaste crear una tarjeta del tipo {newCardDTO.type}, pero llegaste al limite");
+                }
+
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+        }
+        //Traer todas las cards del cliente autenticado - devuelve JSON con las tarjetas de un cliente
+        [HttpGet("current/cards")]
+        public IActionResult GetAllCardsByClient()
+        {
+            try
+            {
+                /* 
+                  * traer el cliente autenticado
+                  * traer todas las cards de este cliente
+                */
+                string email = User.FindFirst("Client") != null ? User.FindFirst("Client").Value : string.Empty;
+                if (email == string.Empty)
+                {
+                    return StatusCode(403, "No estas autorizado");
+                }
+
+                Client client = _clientRepository.FindByEmail(email);
+
+                if (client == null)
+                {
+                    return StatusCode(403, "El cliente no se encontro");
+                }
+
+                var cardsByClient = _cardRepository.GetAllCardsByClient(client.Id);
+
+                var cardDto = cardsByClient.Select(c => new CardDTO(c)).ToList();
+
+                return Ok(cardDto);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
             }
         }
     }

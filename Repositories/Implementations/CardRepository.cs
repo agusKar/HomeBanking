@@ -16,6 +16,14 @@ namespace HomeBanking.Repositories.Implementations
             return FindAll()
                 .ToList();
         }
+        public IEnumerable<Card> GetAllCardsByType(long clientId, string type) {
+            return FindByCondition(c => c.Type == type && c.ClientId == clientId)
+                .ToList();
+        }
+        public IEnumerable<Card> GetAllCardsByClient(long clientId) {
+            return FindByCondition(c => c.ClientId == clientId)
+                .ToList();
+        }
 
         public Card GetCardById(long id)
         {
