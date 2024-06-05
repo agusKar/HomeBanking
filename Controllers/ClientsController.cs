@@ -139,11 +139,23 @@ namespace HomeBanking.Controllers
                 // traigo todas las cuenta para despues validar si tiene menos de 3
                 var accountsByClient = _accountRepository.GetAccountsByClient(client.Id);
                 Account accountCreate = null;
-                if (accountsByClient.Count() < 3) {
-                    var NumberAccountRandom = RandomNumberGenerator.GetInt32(00000000, 99999999); ;
+                if (accountsByClient.Count() < 3)
+                {
+                    var flag = 1;
+                    var NumberAccountRandom = "";
+                    while (flag == 1)
+                    {
+                        NumberAccountRandom = "VIN-" + RandomNumberGenerator.GetInt32(10000000, 99999999);
+                        var getAccount = _accountRepository.GetAccountByNumber(NumberAccountRandom);
+                        if (getAccount == null)
+                        {
+                            flag = 0;
+                        }
+                    }
+
                     accountCreate = new Account
                     {
-                        Number = "VIN-" + NumberAccountRandom.ToString(),
+                        Number = NumberAccountRandom.ToString(),
                         Balance = 0,
                         CreationDate = DateTime.Now,
                         ClientId = client.Id
@@ -224,18 +236,30 @@ namespace HomeBanking.Controllers
                 if (_cardRepository.GetAllCardsByType(client.Id, newCardDTO.type).Count() < 3)
                 {
                     // numero de cvv de 3 digitos aleatorio
-                    var cvvCardRandom = RandomNumberGenerator.GetInt32(000, 999);
-                    // numero de tarjeta de 4 digitos aleatorio (repetir en un form)
-                    var numberCardRandom = "";
-                    for (int i = 0; i < 4; i++)
-                    {
-                        numberCardRandom += RandomNumberGenerator.GetInt32(0000, 9999);
-                        if (i < 3)
-                        {
-                            numberCardRandom += "-";
-                        }
+                    var cvvCardRandom = RandomNumberGenerator.GetInt32(100, 999);
 
+                    var flag = 1;
+                    var numberCardRandom = "";
+                    while (flag == 1)
+                    {
+                        // numero de tarjeta de 4 digitos aleatorio (repetir en un form)
+                        numberCardRandom = "";
+                        for (int i = 0; i < 4; i++)
+                        {
+                            numberCardRandom += RandomNumberGenerator.GetInt32(1000, 9999);
+                            if (i < 3)
+                            {
+                                numberCardRandom += "-";
+                            }
+
+                        }
+                        var getCard = _cardRepository.GetCardByNumber(client.Id, numberCardRandom);
+                        if (getCard == null)
+                        {
+                            flag = 0;
+                        }
                     }
+
                     var newCard = new Card
                     {
                         ClientId = client.Id,
