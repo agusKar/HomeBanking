@@ -38,9 +38,18 @@ namespace HomeBanking.Repositories.Implementations
                 .Include(account => account.Transactions)
                 .ToList();
         }
-        public void SaveAccount(Account account) { 
-            Create(account);
-            SaveChanges();
+        public void SaveAccount(Account account) {
+
+            if (account.Id == 0)
+            {
+                Create(account);
+            }
+            else
+            {
+                Update(account);
+            }
+            SaveChanges(); 
+            RepositoryContext.ChangeTracker.Clear();
         }
     }
 }

@@ -46,10 +46,12 @@ namespace HomeBanking.Repositories.Implementations
         public void SaveChanges()
         {
             this.RepositoryContext.SaveChanges();
+            this.RepositoryContext.ChangeTracker.Clear();
         }
 
         public void Update(T entity)
         {
+
             this.RepositoryContext.Set<T>().Update(entity);
         }
     }
