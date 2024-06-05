@@ -1,10 +1,8 @@
 ﻿using HomeBanking.DTOs;
 using HomeBanking.Models;
-using HomeBanking.Repositories;
+using HomeBanking.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
-using System.Security.Cryptography;
 
 namespace HomeBanking.Controllers
 {
@@ -12,15 +10,33 @@ namespace HomeBanking.Controllers
     [ApiController]
     public class ClientsController : ControllerBase
     {
-        private readonly IClientRepository _clientRepository;
-        private readonly IAccountRepository _accountRepository;
-        private readonly ICardRepository _cardRepository;
+        private readonly IAccountService _accountService;
+        private readonly IClientService _clientService;
+        private readonly ICardService _cardService;
 
-        public ClientsController(IClientRepository clientRepository, IAccountRepository accountRepository, ICardRepository cardRepository)
+
+        public ClientsController(
+            IAccountService accountService,
+            IClientService clientService,
+            ICardService cardService
+        )
         {
-            _clientRepository = clientRepository;
-            _accountRepository = accountRepository;
-            _cardRepository = cardRepository;
+            _accountService = accountService;
+            _clientService = clientService;
+            _cardService = cardService;
+        }
+
+        public Client GetCurrentClient()
+        {
+            string email = User.FindFirst("Client")?.Value ?? string.Empty;
+            if (string.IsNullOrEmpty(email))
+            {
+                throw new Exception("user not found");
+            }
+
+            Client client = _clientService.GetClientByEmail(email);
+
+            return client;
         }
 
         [HttpGet]
@@ -28,7 +44,7 @@ namespace HomeBanking.Controllers
         public IActionResult GetAllClients() {
             try
             {
-                var clients = _clientRepository.GetAllClients();
+                var clients = _clientService.GetAllClients();
                 var clientsDTO = clients.Select(c => new ClientDTO(c)).ToList();
 
                 return Ok(clientsDTO);
@@ -37,11 +53,12 @@ namespace HomeBanking.Controllers
                 return StatusCode(500, e.Message);
             }
         }
+        
         [HttpGet("{id}")]
         public IActionResult GetClientsById(long id) {
             try
             {
-                var clientById = _clientRepository.FindById(id);
+                var clientById = _clientService.GetClientById(id);
                 var clientByIdDTO = new ClientDTO(clientById);
                 return Ok(clientByIdDTO);
             }
@@ -49,26 +66,16 @@ namespace HomeBanking.Controllers
                 return StatusCode(500, e.Message);
             }
         }
+        
         [HttpGet("current")]
         [Authorize(Policy = "ClientOnly")]
         public IActionResult GetCurrent()
         {
             try
             {
-                string email = User.FindFirst("Client") != null ? User.FindFirst("Client").Value : string.Empty;
-                if (email == string.Empty)
-                {
-                    return StatusCode(403, "No estas autorizado");
-                }
+                Client clientCurrent = GetCurrentClient();
 
-                Client client = _clientRepository.FindByEmail(email);
-
-                if (client == null)
-                {
-                    return StatusCode(403, "El cliente no se encontro");
-                }
-
-                var clientDTO = new ClientDTO(client);
+                var clientDTO = new ClientDTO(clientCurrent);
 
                 return Ok(clientDTO);
             }
@@ -77,21 +84,15 @@ namespace HomeBanking.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+        
         [HttpPost]
         public IActionResult Post([FromBody] NewClientDTO newClientDTO)
         {
             try
             {
-                //validamos datos antes
-                if (String.IsNullOrEmpty(newClientDTO.Email) || String.IsNullOrEmpty(newClientDTO.Password) || String.IsNullOrEmpty(newClientDTO.FirstName) || String.IsNullOrEmpty(newClientDTO.LastName))
-                    return StatusCode(403, "datos inválidos");
-
-                //buscamos si ya existe el usuario
-                Client user = _clientRepository.FindByEmail(newClientDTO.Email);
-
-                if (user != null)
-                {
-                    return StatusCode(403, "Email está en uso");
+                Client client = _clientService.GetClientByEmail(newClientDTO.Email);
+                if (client != null) {
+                    return StatusCode(403, "Usuario ya existe.");
                 }
 
                 Client newClient = new Client
@@ -99,11 +100,23 @@ namespace HomeBanking.Controllers
                     Email = newClientDTO.Email,
                     Password = newClientDTO.Password,
                     FirstName = newClientDTO.FirstName,
-                    LastName = newClientDTO.LastName,
+                    LastName = newClientDTO.LastName
                 };
 
-                _clientRepository.Save(newClient);
-                return Created("", newClient);
+                //guardo cliente y retorno ID
+                long newIdCreated = _clientService.SaveAndReturnIdClient(newClient);
+
+                // creo cuenta usando el servicio
+                Account accountCreate = new Account
+                {
+                    Number = _accountService.GetRandomAccountNumber().ToString(),
+                    Balance = 0,
+                    CreationDate = DateTime.Now,
+                    ClientId = newIdCreated
+                };
+                _accountService.SaveAccount(accountCreate);
+
+                return Created();
 
             }
             catch (Exception ex)
@@ -114,6 +127,7 @@ namespace HomeBanking.Controllers
 
         //cuenta creada y asignada al cliente autenticado
         [HttpPost("current/accounts")]
+        [Authorize(Policy = "ClientOnly")]
         public IActionResult CreateAccountToClientAuthenticated()
         {
             try
@@ -123,49 +137,27 @@ namespace HomeBanking.Controllers
                   * verificar si este cliente tiene menos de 3 cuentas sino, devolver 403
                   * si tiene menos de 3 cuentas crear la cuenta, asignarla al cliente obtenido y guardarla, así como retornar una respuesta “201 creada". tiene que empezar con VIN y seguido de max 8 numeros aleatorios. el saldo de la cuenta tiene que ser 0.
                 */
-                string email = User.FindFirst("Client") != null ? User.FindFirst("Client").Value : string.Empty;
-                if (email == string.Empty)
-                {
-                    return StatusCode(403, "No estas autorizado");
-                }
+                Client clientCurrent = GetCurrentClient();
 
-                Client client = _clientRepository.FindByEmail(email);
-
-                if (client == null)
-                {
-                    return StatusCode(403, "El cliente no se encontro");
-                }
 
                 // traigo todas las cuenta para despues validar si tiene menos de 3
-                var accountsByClient = _accountRepository.GetAccountsByClient(client.Id);
-                Account accountCreate = null;
-                if (accountsByClient.Count() < 3)
-                {
-                    var flag = 1;
-                    var NumberAccountRandom = "";
-                    while (flag == 1)
-                    {
-                        NumberAccountRandom = "VIN-" + RandomNumberGenerator.GetInt32(10000000, 99999999);
-                        var getAccount = _accountRepository.GetAccountByNumber(NumberAccountRandom);
-                        if (getAccount == null)
-                        {
-                            flag = 0;
-                        }
-                    }
 
+                Account accountCreate = null;
+                if (_accountService.GetCountAccountsByClient(clientCurrent.Id) < 3)
+                {   
                     accountCreate = new Account
                     {
-                        Number = NumberAccountRandom.ToString(),
+                        Number = _accountService.GetRandomAccountNumber().ToString(),
                         Balance = 0,
                         CreationDate = DateTime.Now,
-                        ClientId = client.Id
+                        ClientId = clientCurrent.Id
                     };
                 }
                 else
                 {
                     return StatusCode(403, "Este cliente llego al máximo de cuentas.");
                 }
-                _accountRepository.SaveAccount(accountCreate);
+                _accountService.SaveAccount(accountCreate);
                 return StatusCode(201, "La cuenta fue creado exitosamente y fue asignada al cliente correctamente.");
             }
             catch (Exception e)
@@ -173,8 +165,10 @@ namespace HomeBanking.Controllers
                 return StatusCode(500, e.Message);
             }
         }
+        
         //Traer todas las cuentas del cliente autenticado - JSON con las cuentas de un cliente
         [HttpGet("current/accounts")]
+        [Authorize(Policy = "ClientOnly")]
         public IActionResult GetAllAccountsByClient()
         {
             try
@@ -183,20 +177,9 @@ namespace HomeBanking.Controllers
                   * traer el cliente autenticado
                   * traer todas las cuentas de este cliente
                 */
-                string email = User.FindFirst("Client") != null ? User.FindFirst("Client").Value : string.Empty;
-                if (email == string.Empty)
-                {
-                    return StatusCode(403, "No estas autorizado");
-                }
+                Client clientCurrent = GetCurrentClient();
 
-                Client client = _clientRepository.FindByEmail(email);
-
-                if (client == null)
-                {
-                    return StatusCode(403, "El cliente no se encontro");
-                }
-
-                var accountsByClient = _accountRepository.GetAccountsByClient(client.Id);
+                var accountsByClient = _accountService.GetAllAccountsByCliente(clientCurrent.Id);
 
                 var accountsDto = accountsByClient.Select(a => new AccountClientDTO(a)).ToList();
 
@@ -207,8 +190,10 @@ namespace HomeBanking.Controllers
                 return StatusCode(500, e.Message);
             }
         }
+        
         //tarjeta creada y asignada al cliente autenticado
         [HttpPost("current/cards")]
+        [Authorize(Policy = "ClientOnly")]
         public IActionResult CreateCardToClientAuthenticated([FromBody] NewCardDTO newCardDTO)
         {
             try
@@ -220,63 +205,36 @@ namespace HomeBanking.Controllers
                   * La fecha de vencimiento debera ser 5 años despues de la creación.
                   * También ten en cuenta que los numeros de tarjeta y el cvv se deben generar de forma aleatoria.
                 */
-                string email = User.FindFirst("Client") != null ? User.FindFirst("Client").Value : string.Empty;
-                if (email == string.Empty)
-                {
-                    return StatusCode(403, "No estas autorizado");
-                }
+                Client clientCurrent = GetCurrentClient();
 
-                Client client = _clientRepository.FindByEmail(email);
-
-                if (client == null)
+                // validar de que tipo es y cuantas hay en la base de datos, si son menos de 3 de ese tipo crear una nueva si no devolver
+                var cardByClient = _cardService.GetAllCardsByType(clientCurrent.Id, newCardDTO.type);
+                if (cardByClient.Count() < 3)
                 {
-                    return StatusCode(403, "El cliente no se encontro");
-                }
-                // validar de que tipo es y cuantas hay en la base de datos, si son menos de 3 de ese tipo crear una nueva si no devolver 403
-                if (_cardRepository.GetAllCardsByType(client.Id, newCardDTO.type).Count() < 3)
-                {
-                    // numero de cvv de 3 digitos aleatorio
-                    var cvvCardRandom = RandomNumberGenerator.GetInt32(100, 999);
-
-                    var flag = 1;
-                    var numberCardRandom = "";
-                    while (flag == 1)
+                    if(!cardByClient.Any(c => c.Color == newCardDTO.color))
                     {
-                        // numero de tarjeta de 4 digitos aleatorio (repetir en un form)
-                        numberCardRandom = "";
-                        for (int i = 0; i < 4; i++)
+                        var newCard = new Card
                         {
-                            numberCardRandom += RandomNumberGenerator.GetInt32(1000, 9999);
-                            if (i < 3)
-                            {
-                                numberCardRandom += "-";
-                            }
+                            ClientId = clientCurrent.Id,
+                            CardHolder = clientCurrent.FirstName + " " + clientCurrent.LastName,
+                            Color = newCardDTO.color,
+                            Cvv = _cardService.GenerateCvv(),
+                            FromDate = DateTime.Now,
+                            ThruDate = DateTime.Now.AddYears(5),
+                            Number = _cardService.GenerateNumberCardUnique(clientCurrent.Id),
+                            Type = newCardDTO.type
+                        };
 
-                        }
-                        var getCard = _cardRepository.GetCardByNumber(client.Id, numberCardRandom);
-                        if (getCard == null)
-                        {
-                            flag = 0;
-                        }
+                        _cardService.AddCard(newCard);
                     }
-
-                    var newCard = new Card
+                    else
                     {
-                        ClientId = client.Id,
-                        CardHolder = client.FirstName + " " + client.LastName,
-                        Color = newCardDTO.color,
-                        Cvv = cvvCardRandom,
-                        FromDate = DateTime.Now,
-                        ThruDate = DateTime.Now.AddYears(5),
-                        Number = numberCardRandom,
-                        Type = newCardDTO.type
-                    };
-
-                    _cardRepository.AddCard(newCard);
+                        return StatusCode(403, $"Intentaste crear una tarjeta {newCardDTO.color} del tipo {newCardDTO.type}, pero llegaste al limite.");
+                    }
                 }
                 else
                 {
-                    return StatusCode(403, $"Intentaste crear una tarjeta del tipo {newCardDTO.type}, pero llegaste al limite");
+                    return StatusCode(403, $"Intentaste crear una tarjeta del tipo {newCardDTO.type}, pero llegaste al limite.");
                 }
 
                 return Ok();
@@ -288,6 +246,7 @@ namespace HomeBanking.Controllers
         }
         //Traer todas las cards del cliente autenticado - devuelve JSON con las tarjetas de un cliente
         [HttpGet("current/cards")]
+        [Authorize(Policy = "ClientOnly")]
         public IActionResult GetAllCardsByClient()
         {
             try
@@ -296,20 +255,9 @@ namespace HomeBanking.Controllers
                   * traer el cliente autenticado
                   * traer todas las cards de este cliente
                 */
-                string email = User.FindFirst("Client") != null ? User.FindFirst("Client").Value : string.Empty;
-                if (email == string.Empty)
-                {
-                    return StatusCode(403, "No estas autorizado");
-                }
+                Client clientCurrent = GetCurrentClient();
 
-                Client client = _clientRepository.FindByEmail(email);
-
-                if (client == null)
-                {
-                    return StatusCode(403, "El cliente no se encontro");
-                }
-
-                var cardsByClient = _cardRepository.GetAllCardsByClient(client.Id);
+                var cardsByClient = _cardService.GetAllCardsByClient(clientCurrent.Id);
 
                 var cardDto = cardsByClient.Select(c => new CardDTO(c)).ToList();
 

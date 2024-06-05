@@ -3,6 +3,8 @@ using HomeBanking.Repositories.Implementations;
 using HomeBanking.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using HomeBanking.Services;
+using HomeBanking.Services.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +25,12 @@ builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<ILoanRepository, LoanRepository>();
 builder.Services.AddScoped<IClientLoanRepository, ClientLoanRepository>();
 builder.Services.AddScoped<ICardRepository, CardRepository>();
+
+// Aqui se registran todos los servicios
+builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IClientService, ClientService>();
+builder.Services.AddScoped<ICardService, CardService>();
+
 
 //autenticación
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
