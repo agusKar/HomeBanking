@@ -1,5 +1,6 @@
 ﻿using HomeBanking.DTOs;
 using HomeBanking.Repositories;
+using HomeBanking.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HomeBanking.Controllers
@@ -8,18 +9,17 @@ namespace HomeBanking.Controllers
     [ApiController]
     public class AccountsController : ControllerBase
     {
-        private readonly IAccountRepository _accountRepository;
-
-        public AccountsController(IAccountRepository accountRepository)
+        private readonly IAccountService _accountService;
+        public AccountsController(IAccountService accountService)
         {
-            _accountRepository = accountRepository;
+            _accountService = accountService;
         }
         [HttpGet]
         public ActionResult GetAllAccounts()
         {
             try
             {
-                var accounts = _accountRepository.GetAllAccounts();
+                var accounts = _accountService.GetAllAccounts();
                 var accountsDTO = accounts.Select(accounts => new AccountDTO(accounts)).ToList();
                 return Ok(accountsDTO);
 
@@ -33,7 +33,7 @@ namespace HomeBanking.Controllers
         public ActionResult GetAccount(long id) {
             try
             {
-                var account = _accountRepository.GetAccountById(id);
+                var account = _accountService.GetAccountById(id);
                 var accountDTO = new AccountDTO(account);
                 return Ok(accountDTO);
             } catch (Exception e) {

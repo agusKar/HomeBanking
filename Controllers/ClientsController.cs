@@ -14,7 +14,6 @@ namespace HomeBanking.Controllers
         private readonly IClientService _clientService;
         private readonly ICardService _cardService;
 
-
         public ClientsController(
             IAccountService accountService,
             IClientService clientService,
@@ -34,9 +33,7 @@ namespace HomeBanking.Controllers
                 throw new Exception("user not found");
             }
 
-            Client client = _clientService.GetClientByEmail(email);
-
-            return client;
+            return _clientService.GetClientByEmail(email);
         }
 
         [HttpGet]
@@ -244,6 +241,7 @@ namespace HomeBanking.Controllers
                 return StatusCode(500, e.Message);
             }
         }
+        
         //Traer todas las cards del cliente autenticado - devuelve JSON con las tarjetas de un cliente
         [HttpGet("current/cards")]
         [Authorize(Policy = "ClientOnly")]

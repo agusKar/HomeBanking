@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using HomeBanking.DTOs;
+using HomeBanking.Services;
 
 namespace HomeBanking.Controllers
 {
@@ -12,10 +13,12 @@ namespace HomeBanking.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IClientRepository _clientRepository;
-        public AuthController(IClientRepository clientRepository)
+        private readonly IClientService _clientService;
+
+        public AuthController(IClientService clientService)
         {
-            _clientRepository = clientRepository;
+            _clientService = clientService;
+
         }
 
         [HttpPost("login")]
@@ -24,7 +27,9 @@ namespace HomeBanking.Controllers
         {
             try
             {
-                Client user = _clientRepository.FindByEmail(LoginDTO.Email);
+                //Client user = _clientRepository.FindByEmail(LoginDTO.Email);
+                Client user = _clientService.GetClientByEmail(LoginDTO.Email);
+
                 if (user == null || !String.Equals(user.Password, LoginDTO.Password)) {
                     return Unauthorized();
                 }

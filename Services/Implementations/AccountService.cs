@@ -12,12 +12,33 @@ namespace HomeBanking.Services.Implementations
         {
             _accountRepository = accountRepository;
         }
+        public Account GetAccountByNumber(string numberAccount)
+        {
+            try
+            {
+                return _accountRepository.GetAccountByNumber(numberAccount);
+            }
+            catch (Exception)
+            {
+                throw new Exception("Error al traer la cuenta por su numero.");
+            }
+        }
         public int GetCountAccountsByClient(long clientId)
         {
             var accountsByClient = _accountRepository.GetAccountsByClient(clientId);
             return accountsByClient.Count();
         }
-
+        public IEnumerable<Account> GetAllAccounts()
+        {
+            try
+            {
+                return _accountRepository.GetAllAccounts();
+            }
+            catch (Exception)
+            {
+                throw new Exception("Error al traer todas las cuentas.");
+            }
+        }
         public string GetRandomAccountNumber()
         {
             string NumberAccountRandom;
@@ -48,6 +69,17 @@ namespace HomeBanking.Services.Implementations
             catch (Exception)
             {
                 throw new Exception("Error al obtener todos las cuentas");
+            }
+        }
+        public Account GetAccountById(long id)
+        {
+            try
+            {
+                return _accountRepository.GetAccountById(id);
+            }
+            catch (Exception)
+            {
+                throw new Exception("Error al obtener la cuenta por ID");
             }
         }
     }

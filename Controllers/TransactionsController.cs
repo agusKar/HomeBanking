@@ -1,6 +1,7 @@
 ﻿using HomeBanking.DTOs;
 using HomeBanking.Models;
 using HomeBanking.Repositories;
+using HomeBanking.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
@@ -10,16 +11,20 @@ namespace HomeBanking.Controllers
     [ApiController]
     public class TransactionsController : ControllerBase
     {
-        public readonly IClientRepository _clientRepository;
-        public readonly IAccountRepository _accountRepository;
-        public readonly ITransactionRepository _transactionRepository;
+        public readonly IClientService _clientService;
+        public readonly IAccountService _accountService;
+        public readonly ITransactionService _transactionService;
 
         //crear constructor con todos los repositorios que voy a usar
-        public TransactionsController(IClientRepository clientRepository, IAccountRepository accountRepository, ITransactionRepository transactionRepository)
+        public TransactionsController(
+            IClientService clientService,
+            IAccountService accountService,
+            ITransactionService transactionService
+         )
         {
-            _clientRepository = clientRepository;
-            _accountRepository = accountRepository;
-            _transactionRepository = transactionRepository;
+            _clientService = clientService;
+            _accountService = accountService;
+            _transactionService = transactionService;
         }
 
         /*
@@ -36,7 +41,7 @@ namespace HomeBanking.Controllers
                     return StatusCode(403, "No estas autorizado");
                 }
 
-                Client client = _clientRepository.FindByEmail(email);
+                Client client = _clientService.GetClientByEmail(email);
 
                 if (client == null)
                 {
@@ -56,7 +61,7 @@ namespace HomeBanking.Controllers
                 }
 
                 //Verificar que exista la cuenta de origen
-                var fromAccount = _accountRepository.GetAccountByNumber(transferDTO.FromAccountNumber);
+                var fromAccount = _accountService.GetAccountByNumber(transferDTO.FromAccountNumber);
                 if (fromAccount == null)
                 {
                     return StatusCode(403, "La cuenta de origen no existe.");
@@ -69,7 +74,7 @@ namespace HomeBanking.Controllers
                 }
 
                 //Verificar que exista la cuenta de destino
-                var toAccount = _accountRepository.GetAccountByNumber(transferDTO.ToAccountNumber);
+                var toAccount = _accountService.GetAccountByNumber(transferDTO.ToAccountNumber);
                 if (toAccount == null)
                 {
                     return StatusCode(403, "La cuenta de destino no existe.");
@@ -105,27 +110,27 @@ namespace HomeBanking.Controllers
 
                 };
 
-                _transactionRepository.SaveTransaction(fromTransacction);
-                _transactionRepository.SaveTransaction(toTransacction);
+                _transactionService.SaveTransaction(fromTransacction);
+                _transactionService.SaveTransaction(toTransacction);
 
-                var fromTransactionInDB = _transactionRepository.GetTransactionsById(fromTransacction.Id);
-                var toTransactionInDB = _transactionRepository.GetTransactionsById(toTransacction.Id);
+                var fromTransactionInDB = _transactionService.GetTransactionsById(fromTransacction.Id);
+                var toTransactionInDB = _transactionService.GetTransactionsById(toTransacction.Id);
                 if (fromTransactionInDB != null && toTransactionInDB != null)
                 {
                     /*
                      * A la cuenta de origen se le restará el monto indicado en la petición
                      * a la cuenta de destino se le sumará el mismo monto.
                     */
-                    var fromAccountDB = _accountRepository.GetAccountById(fromAccount.Id);
-                    var toAccountDB = _accountRepository.GetAccountById(toAccount.Id);
+                    var fromAccountDB = _accountService.GetAccountById(fromAccount.Id);
+                    var toAccountDB = _accountService.GetAccountById(toAccount.Id);
 
                     if(fromAccountDB != null && toAccountDB != null)
                     {
                         fromAccountDB.Balance += fromTransacction.Amount;
                         toAccountDB.Balance += toTransacction.Amount;
 
-                        _accountRepository.SaveAccount(fromAccountDB);
-                        _accountRepository.SaveAccount(toAccountDB);
+                        _accountService.SaveAccount(fromAccountDB);
+                        _accountService.SaveAccount(toAccountDB);
                     }
                     else
                     {
