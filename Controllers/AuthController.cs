@@ -1,11 +1,11 @@
-﻿using HomeBanking.Models;
-using HomeBanking.Repositories;
-using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using HomeBanking.DTOs;
 using HomeBanking.Services;
+using System.Security.Claims;
+using HomeBanking.Utilities;
+using System.Net;
 
 namespace HomeBanking.Controllers
 {
@@ -13,12 +13,11 @@ namespace HomeBanking.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IClientService _clientService;
+        private readonly IAuthService _authService;
 
-        public AuthController(IClientService clientService)
+        public AuthController(IAuthService authService)
         {
-            _clientService = clientService;
-
+            _authService = authService;
         }
 
         [HttpPost("login")]
@@ -27,35 +26,16 @@ namespace HomeBanking.Controllers
         {
             try
             {
-                //Client user = _clientRepository.FindByEmail(LoginDTO.Email);
-                Client user = _clientService.GetClientByEmail(LoginDTO.Email);
-
-                if (user == null || !String.Equals(user.Password, LoginDTO.Password)) {
-                    return Unauthorized();
-                }
-                var claims = new List<Claim>
-                {
-                    new Claim("Client", user.Email)
-                };
-
-                if (user.Email == "agustin@gmail.com")
-                {
-                    claims.Add(new Claim("Admin", "true"));
-                }
-
-                var claimsIdentity = new ClaimsIdentity(
-                    claims,
-                    CookieAuthenticationDefaults.AuthenticationScheme
-                    );
+                ClaimsIdentity claimsIdentity = _authService.GenerateClaim(LoginDTO);
 
                 await HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     new ClaimsPrincipal(claimsIdentity));
-
                 return Ok();
             }
-            catch (Exception e) {
-                return StatusCode(500, e.Message);
+            catch (Exception e)
+            {
+                throw new CustomException(e.Message, HttpStatusCode.InternalServerError);
             }
         }
         [HttpPost("logout")]
@@ -67,9 +47,9 @@ namespace HomeBanking.Controllers
                 CookieAuthenticationDefaults.AuthenticationScheme);
                 return Ok();
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                return StatusCode(500, ex.Message);
+                throw new CustomException(e.Message, HttpStatusCode.InternalServerError);
             }
         }
     }

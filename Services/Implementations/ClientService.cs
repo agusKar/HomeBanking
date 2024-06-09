@@ -1,6 +1,7 @@
-﻿using HomeBanking.Models;
+﻿using HomeBanking.DTOs;
+using HomeBanking.Utilities;
+using HomeBanking.Models;
 using HomeBanking.Repositories;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using System.Net;
 
 namespace HomeBanking.Services.Implementations
@@ -13,17 +14,24 @@ namespace HomeBanking.Services.Implementations
             _clientRepository = clientRepository;
         }
 
-        public long SaveAndReturnIdClient(Client client)
+        public Client Save(NewClientDTO newClientDTO)
         {
             try
             {
+                Client client = new Client
+                {
+                    Email = newClientDTO.Email,
+                    Password = BCrypt.Net.BCrypt.HashPassword(newClientDTO.Password),
+                    FirstName = newClientDTO.FirstName,
+                    LastName = newClientDTO.LastName
+                };
                 _clientRepository.Save(client);
-                Client newClientSaved = _clientRepository.FindByEmail(client.Email);
-                return newClientSaved.Id;
+
+                return _clientRepository.FindByEmail(client.Email);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                throw new Exception("Error al guardar y retornar Id de client");
+                throw new CustomException("Error al guardar y retornar Id de client", HttpStatusCode.Forbidden);
             }
         }
         public Client GetClientByEmail(string email)
@@ -34,29 +42,31 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new Exception("Error al obtener client por email");
+                throw new CustomException("Error al obtener client por email", HttpStatusCode.Forbidden);
             }
         }
-        public IEnumerable<Client> GetAllClients()
+        public IEnumerable<ClientDTO> GetAllClients()
         {
             try
             {
-                return _clientRepository.GetAllClients();
+                IEnumerable<Client> clients = _clientRepository.GetAllClients();
+                return clients.Select(c => new ClientDTO(c)).ToList();
             }
             catch (Exception)
             {
-                throw new Exception("Error al obtener todos los clients");
+                throw new CustomException("Error al obtener todos los clients", HttpStatusCode.Forbidden);
             }
         }
-        public Client GetClientById(long id)
+        public ClientDTO GetClientById(long id)
         {
             try
             {
-                return _clientRepository.FindById(id);
+                Client clientById = _clientRepository.FindById(id);
+                return new ClientDTO(clientById);
             }
             catch (Exception)
             {
-                throw new Exception("Error al obtener todos los clients");
+                throw new CustomException("Error al obtener todos los clients", HttpStatusCode.Forbidden);
             }
         }
     }

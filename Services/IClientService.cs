@@ -1,12 +1,13 @@
-﻿using HomeBanking.Models;
+﻿using HomeBanking.DTOs;
+using HomeBanking.Models;
 
 namespace HomeBanking.Services
 {
     public interface IClientService
     {
-        long SaveAndReturnIdClient(Client client);
+        Client Save(NewClientDTO newClientDTO);
         Client GetClientByEmail(string email);
-        Client GetClientById(long id);
-        IEnumerable<Client> GetAllClients();
+        ClientDTO GetClientById(long id);
+        IEnumerable<ClientDTO> GetAllClients();
     }
 }

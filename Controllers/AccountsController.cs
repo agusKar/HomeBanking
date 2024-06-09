@@ -1,7 +1,10 @@
 ﻿using HomeBanking.DTOs;
+using HomeBanking.Utilities;
 using HomeBanking.Repositories;
 using HomeBanking.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HomeBanking.Controllers
 {
@@ -15,6 +18,7 @@ namespace HomeBanking.Controllers
             _accountService = accountService;
         }
         [HttpGet]
+        [Authorize(Policy = "AdminOnly")]
         public ActionResult GetAllAccounts()
         {
             try
@@ -26,18 +30,20 @@ namespace HomeBanking.Controllers
             }
             catch (Exception e)
             {
-                return StatusCode(500, e.Message);
+                throw new CustomException(e.Message, HttpStatusCode.InternalServerError);
             }
         }
         [HttpGet("{id}")]
+        [Authorize(Policy = "ClientOnly")]
         public ActionResult GetAccount(long id) {
             try
             {
                 var account = _accountService.GetAccountById(id);
                 var accountDTO = new AccountDTO(account);
                 return Ok(accountDTO);
-            } catch (Exception e) {
-                return StatusCode(500, e.Message);
+            } catch (Exception e)
+            {
+                throw new CustomException(e.Message, HttpStatusCode.InternalServerError);
             }
         }
     }

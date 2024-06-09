@@ -19,10 +19,10 @@ namespace HomeBanking.Repositories.Implementations
             return FindByCondition(transaction => transaction.Id == id)
                 .FirstOrDefault();
         }
-        public void SaveTransaction(Transaction transaction)
+        public int SaveTransaction(Transaction transaction)
         {
             Create(transaction);
-            SaveChanges();
+            return SaveChanges();
         }
     }
 }

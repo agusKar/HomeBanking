@@ -1,8 +1,11 @@
 ﻿using HomeBanking.DTOs;
+using HomeBanking.Utilities;
 using HomeBanking.Models;
 using HomeBanking.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
+using System.Collections.Generic;
 
 namespace HomeBanking.Controllers
 {
@@ -24,13 +27,13 @@ namespace HomeBanking.Controllers
             _clientService = clientService;
             _cardService = cardService;
         }
-
+        [ApiExplorerSettings(IgnoreApi = true)]
         public Client GetCurrentClient()
         {
             string email = User.FindFirst("Client")?.Value ?? string.Empty;
             if (string.IsNullOrEmpty(email))
             {
-                throw new Exception("user not found");
+                throw new CustomException("Usuario no encontrado", HttpStatusCode.Forbidden);
             }
 
             return _clientService.GetClientByEmail(email);
@@ -41,13 +44,12 @@ namespace HomeBanking.Controllers
         public IActionResult GetAllClients() {
             try
             {
-                var clients = _clientService.GetAllClients();
-                var clientsDTO = clients.Select(c => new ClientDTO(c)).ToList();
-
+                var clientsDTO = _clientService.GetAllClients();
                 return Ok(clientsDTO);
             }
-            catch (Exception e) {
-                return StatusCode(500, e.Message);
+            catch (Exception e)
+            {
+                throw new CustomException(e.Message, HttpStatusCode.InternalServerError);
             }
         }
         
@@ -55,12 +57,12 @@ namespace HomeBanking.Controllers
         public IActionResult GetClientsById(long id) {
             try
             {
-                var clientById = _clientService.GetClientById(id);
-                var clientByIdDTO = new ClientDTO(clientById);
+                var clientByIdDTO = _clientService.GetClientById(id);
                 return Ok(clientByIdDTO);
             }
-            catch (Exception e) {
-                return StatusCode(500, e.Message);
+            catch (Exception e)
+            {
+                throw new CustomException(e.Message, HttpStatusCode.InternalServerError);
             }
         }
         
@@ -71,14 +73,11 @@ namespace HomeBanking.Controllers
             try
             {
                 Client clientCurrent = GetCurrentClient();
-
-                var clientDTO = new ClientDTO(clientCurrent);
-
-                return Ok(clientDTO);
+                return Ok(new ClientDTO(clientCurrent));
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                return StatusCode(500, ex.Message);
+                throw new CustomException(e.Message, HttpStatusCode.InternalServerError);
             }
         }
         
@@ -89,36 +88,25 @@ namespace HomeBanking.Controllers
             {
                 Client client = _clientService.GetClientByEmail(newClientDTO.Email);
                 if (client != null) {
-                    return StatusCode(403, "Usuario ya existe.");
+                    throw new CustomException("Usuario ya existe", HttpStatusCode.Forbidden);
                 }
 
-                Client newClient = new Client
-                {
-                    Email = newClientDTO.Email,
-                    Password = newClientDTO.Password,
-                    FirstName = newClientDTO.FirstName,
-                    LastName = newClientDTO.LastName
-                };
-
                 //guardo cliente y retorno ID
-                long newIdCreated = _clientService.SaveAndReturnIdClient(newClient);
+                Client ClientCreated = _clientService.Save(newClientDTO);
 
                 // creo cuenta usando el servicio
-                Account accountCreate = new Account
-                {
-                    Number = _accountService.GetRandomAccountNumber().ToString(),
-                    Balance = 0,
-                    CreationDate = DateTime.Now,
-                    ClientId = newIdCreated
-                };
-                _accountService.SaveAccount(accountCreate);
-
-                return Created();
+                _accountService.SaveAccount(ClientCreated.Id);
+                ClientDTO ClientDto = new ClientDTO(ClientCreated);
+                // esto seria para asignarle la cuenta recien creada al cliente y al crearlo se devuelve en el mismo objeto
+                //List<AccountClientDTO> lst = new List<AccountClientDTO>();
+                //lst.Add(new AccountClientDTO(AccountCreated));
+                //ClientDto.Accounts = lst;
+                return StatusCode(201, ClientDto);
 
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                return StatusCode(500, ex.Message);
+                throw new CustomException(e.Message, HttpStatusCode.InternalServerError);
             }
         }
 
@@ -129,37 +117,23 @@ namespace HomeBanking.Controllers
         {
             try
             {
-                /* 
-                  * traer el cliente autenticado
-                  * verificar si este cliente tiene menos de 3 cuentas sino, devolver 403
-                  * si tiene menos de 3 cuentas crear la cuenta, asignarla al cliente obtenido y guardarla, así como retornar una respuesta “201 creada". tiene que empezar con VIN y seguido de max 8 numeros aleatorios. el saldo de la cuenta tiene que ser 0.
-                */
                 Client clientCurrent = GetCurrentClient();
 
-
                 // traigo todas las cuenta para despues validar si tiene menos de 3
-
-                Account accountCreate = null;
                 if (_accountService.GetCountAccountsByClient(clientCurrent.Id) < 3)
-                {   
-                    accountCreate = new Account
-                    {
-                        Number = _accountService.GetRandomAccountNumber().ToString(),
-                        Balance = 0,
-                        CreationDate = DateTime.Now,
-                        ClientId = clientCurrent.Id
-                    };
+                {
+                    Account accountCreated = _accountService.SaveAccount(clientCurrent.Id);
+
+                    return StatusCode(201, new AccountDTO(accountCreated));
                 }
                 else
                 {
-                    return StatusCode(403, "Este cliente llego al máximo de cuentas.");
+                    return StatusCode(403,"Este cliente llego al máximo de cuentas");
                 }
-                _accountService.SaveAccount(accountCreate);
-                return StatusCode(201, "La cuenta fue creado exitosamente y fue asignada al cliente correctamente.");
             }
             catch (Exception e)
             {
-                return StatusCode(500, e.Message);
+                throw new CustomException(e.Message, HttpStatusCode.InternalServerError);
             }
         }
         
@@ -184,7 +158,7 @@ namespace HomeBanking.Controllers
             }
             catch (Exception e)
             {
-                return StatusCode(500, e.Message);
+                throw new CustomException(e.Message, HttpStatusCode.InternalServerError);
             }
         }
         
@@ -195,50 +169,15 @@ namespace HomeBanking.Controllers
         {
             try
             {
-                /* 
-                  * traer el cliente autenticado
-                  * verificar que tenga menos de 6, 3 credito - 3 debito, sino devuelve 403
-                  * si tiene menos de la condicion crear la tarjeta y asignarla al cliente autenticado.
-                  * La fecha de vencimiento debera ser 5 años despues de la creación.
-                  * También ten en cuenta que los numeros de tarjeta y el cvv se deben generar de forma aleatoria.
-                */
-                Client clientCurrent = GetCurrentClient();
+                Client currentClient = GetCurrentClient();
 
-                // validar de que tipo es y cuantas hay en la base de datos, si son menos de 3 de ese tipo crear una nueva si no devolver
-                var cardByClient = _cardService.GetAllCardsByType(clientCurrent.Id, newCardDTO.type);
-                if (cardByClient.Count() < 3)
-                {
-                    if(!cardByClient.Any(c => c.Color == newCardDTO.color))
-                    {
-                        var newCard = new Card
-                        {
-                            ClientId = clientCurrent.Id,
-                            CardHolder = clientCurrent.FirstName + " " + clientCurrent.LastName,
-                            Color = newCardDTO.color,
-                            Cvv = _cardService.GenerateCvv(),
-                            FromDate = DateTime.Now,
-                            ThruDate = DateTime.Now.AddYears(5),
-                            Number = _cardService.GenerateNumberCardUnique(clientCurrent.Id),
-                            Type = newCardDTO.type
-                        };
+                Card cardCreated = _cardService.AddCard(currentClient, newCardDTO);
 
-                        _cardService.AddCard(newCard);
-                    }
-                    else
-                    {
-                        return StatusCode(403, $"Intentaste crear una tarjeta {newCardDTO.color} del tipo {newCardDTO.type}, pero llegaste al limite.");
-                    }
-                }
-                else
-                {
-                    return StatusCode(403, $"Intentaste crear una tarjeta del tipo {newCardDTO.type}, pero llegaste al limite.");
-                }
-
-                return Ok();
+                return Ok(new CardDTO(cardCreated));
             }
             catch (Exception e)
             {
-                return StatusCode(500, e.Message);
+                throw new CustomException(e.Message, HttpStatusCode.InternalServerError);
             }
         }
         
@@ -263,7 +202,7 @@ namespace HomeBanking.Controllers
             }
             catch (Exception e)
             {
-                return StatusCode(500, e.Message);
+                throw new CustomException(e.Message, HttpStatusCode.InternalServerError);
             }
         }
     }

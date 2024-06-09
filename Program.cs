@@ -30,6 +30,8 @@ builder.Services.AddScoped<ICardRepository, CardRepository>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<ICardService, CardService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
 
 
 //autenticación
@@ -49,24 +51,24 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
+//using (var scope = app.Services.CreateScope())
+//{
 
-    // Aqui obtenemos todos los services registrados en la App
-    var services = scope.ServiceProvider;
-    try
-    {
+//    // Aqui obtenemos todos los services registrados en la App
+//    var services = scope.ServiceProvider;
+//    try
+//    {
 
-        // En este paso buscamos un service que este con la clase HomeBankingContext
-        var context = services.GetRequiredService<HomeBankingContext>();
-        DBInitializer.Initialize(context);
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Ha ocurrido un error al enviar la información a la base de datos!");
-    }
-}
+//        // En este paso buscamos un service que este con la clase HomeBankingContext
+//        var context = services.GetRequiredService<HomeBankingContext>();
+//        DBInitializer.Initialize(context);
+//    }
+//    catch (Exception ex)
+//    {
+//        var logger = services.GetRequiredService<ILogger<Program>>();
+//        logger.LogError(ex, "Ha ocurrido un error al enviar la información a la base de datos!");
+//    }
+//}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

@@ -6,6 +6,6 @@ namespace HomeBanking.Repositories
     {
         IEnumerable<Transaction> GetAllTransactions();
         Transaction GetTransactionsById(long id);
-        void SaveTransaction(Transaction transaction);
+        int SaveTransaction(Transaction transaction);
     }
 }

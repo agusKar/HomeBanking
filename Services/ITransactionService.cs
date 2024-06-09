@@ -1,4 +1,5 @@
-﻿using HomeBanking.Models;
+﻿using HomeBanking.DTOs;
+using HomeBanking.Models;
 
 namespace HomeBanking.Services
 {
@@ -6,6 +7,7 @@ namespace HomeBanking.Services
     {
         IEnumerable<Transaction> GetAllTransactions();
         Transaction GetTransactionsById(long id);
-        void SaveTransaction(Transaction transaction);
+        int SaveTransaction(Transaction transaction);
+        TransferReturnDTO CreateTransaction(TransferDTO transferDTO, long id);
     }
 }

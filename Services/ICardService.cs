@@ -1,4 +1,5 @@
-﻿using HomeBanking.Models;
+﻿using HomeBanking.DTOs;
+using HomeBanking.Models;
 
 namespace HomeBanking.Services
 {
@@ -8,6 +9,6 @@ namespace HomeBanking.Services
         string GenerateNumberCardUnique(long clientId);
         IEnumerable<Card> GetAllCardsByType(long clientId, string type);
         IEnumerable<Card> GetAllCardsByClient(long clientId);
-        void AddCard(Card card);
+        Card AddCard(Client currentClient, NewCardDTO newCardDTO);
     }
 }

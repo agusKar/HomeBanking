@@ -43,10 +43,11 @@ namespace HomeBanking.Repositories.Implementations
             return this.RepositoryContext.Set<T>().Where(expression).AsNoTrackingWithIdentityResolution();
         }
 
-        public void SaveChanges()
+        public int SaveChanges()
         {
-            this.RepositoryContext.SaveChanges();
+            int entriesModify = this.RepositoryContext.SaveChanges();
             this.RepositoryContext.ChangeTracker.Clear();
+            return entriesModify;
         }
 
         public void Update(T entity)

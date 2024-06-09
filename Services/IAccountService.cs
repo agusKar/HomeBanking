@@ -7,7 +7,8 @@ namespace HomeBanking.Services
         string GetRandomAccountNumber();
         int GetCountAccountsByClient(long clientId);
         Account GetAccountByNumber(string numberAccount);
-        void SaveAccount(Account account);
+        Account SaveAccount(long newIdCreated);
+        void UpdateAccount(Account account);
         IEnumerable<Account> GetAllAccountsByCliente(long clientId);
         IEnumerable<Account> GetAllAccounts();
         Account GetAccountById(long id);

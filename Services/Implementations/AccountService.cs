@@ -1,7 +1,8 @@
-﻿using HomeBanking.Models;
+﻿using HomeBanking.Utilities;
+using HomeBanking.Models;
 using HomeBanking.Repositories;
-using HomeBanking.Repositories.Implementations;
 using System.Security.Cryptography;
+using System.Net;
 
 namespace HomeBanking.Services.Implementations
 {
@@ -20,7 +21,7 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new Exception("Error al traer la cuenta por su numero.");
+                throw new CustomException("Error al traer la cuenta por su numero.", HttpStatusCode.Forbidden);
             }
         }
         public int GetCountAccountsByClient(long clientId)
@@ -36,7 +37,7 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new Exception("Error al traer todas las cuentas.");
+                throw new CustomException("Error al traer todas las cuentas.", HttpStatusCode.Forbidden);
             }
         }
         public string GetRandomAccountNumber()
@@ -49,7 +50,27 @@ namespace HomeBanking.Services.Implementations
             } while (_accountRepository.GetAccountByNumber(NumberAccountRandom) != null);
             return NumberAccountRandom;
         }
-        public void SaveAccount(Account account)
+        public Account SaveAccount(long newIdCreated)
+        {
+            try
+            {
+                Account account = new Account
+                {
+                    Number = GetRandomAccountNumber().ToString(),
+                    Balance = 0,
+                    CreationDate = DateTime.Now,
+                    ClientId = newIdCreated
+                };
+                _accountRepository.SaveAccount(account);
+
+                return _accountRepository.GetAccountByNumber(account.Number);
+            }
+            catch (Exception)
+            {
+                throw new CustomException("Error al guardar la cuenta.", HttpStatusCode.Forbidden);
+            }
+        }
+        public void UpdateAccount(Account account)
         {
             try
             {
@@ -57,7 +78,7 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new Exception("Error al guardar la cuenta");
+                throw new CustomException("Error al modificar la cuenta.", HttpStatusCode.Forbidden);
             }
         }
         public IEnumerable<Account> GetAllAccountsByCliente(long clientId)
@@ -68,7 +89,7 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new Exception("Error al obtener todos las cuentas");
+                throw new CustomException("Error al obtener todos las cuentas.", HttpStatusCode.Forbidden);
             }
         }
         public Account GetAccountById(long id)
@@ -79,7 +100,7 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new Exception("Error al obtener la cuenta por ID");
+                throw new CustomException("Error al obtener la cuenta por ID.", HttpStatusCode.Forbidden);
             }
         }
     }
