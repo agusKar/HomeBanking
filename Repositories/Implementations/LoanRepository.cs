@@ -19,11 +19,5 @@ namespace HomeBanking.Repositories.Implementations
             return FindByCondition(l => l.Id == id)
                 .FirstOrDefault();
         }
-
-        public void SaveLoan(Loan loan)
-        {
-            Create(loan);
-            SaveChanges();
-        }
     }
 }

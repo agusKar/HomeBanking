@@ -25,6 +25,9 @@ builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<ILoanRepository, LoanRepository>();
 builder.Services.AddScoped<IClientLoanRepository, ClientLoanRepository>();
 builder.Services.AddScoped<ICardRepository, CardRepository>();
+builder.Services.AddScoped<ILoanRepository, LoanRepository>();
+builder.Services.AddScoped<IClientLoanRepository, ClientLoanRepository>();
+
 
 // Aqui se registran todos los servicios
 builder.Services.AddScoped<IAccountService, AccountService>();
@@ -32,6 +35,9 @@ builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<ICardService, CardService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<ILoanService, LoanService>();
+builder.Services.AddScoped<IClientLoanService, ClientLoanService>();
+
 
 
 //autenticación

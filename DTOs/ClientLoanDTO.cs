@@ -6,6 +6,7 @@ namespace HomeBanking.DTOs
     {
         public long Id { get; set; }
         public long LoanId { get; set; }
+        public long ClientId { get; set; }
         public string Name { get; set; }
         public double Amount { get; set; }
         public string Payments { get; set; }
@@ -17,6 +18,7 @@ namespace HomeBanking.DTOs
             Name = clientLoan.Loan.Name;
             Amount = clientLoan.Amount;
             Payments = clientLoan.Payments;
+            ClientId = clientLoan.ClientId;
 
         }
     }

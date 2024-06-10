@@ -22,7 +22,9 @@ namespace HomeBanking.Repositories.Implementations
         public int SaveTransaction(Transaction transaction)
         {
             Create(transaction);
-            return SaveChanges();
+            int save = SaveChanges();
+            RepositoryContext.ChangeTracker.Clear();
+            return save;
         }
     }
 }

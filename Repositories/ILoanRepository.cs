@@ -6,6 +6,5 @@ namespace HomeBanking.Repositories
     {
         IEnumerable<Loan> GetAll();
         Loan GetLoanById(long id);
-        void SaveLoan(Loan loan);
     }
 }

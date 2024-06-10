@@ -9,21 +9,6 @@ namespace HomeBanking.Repositories.Implementations
         {
             
         }
-
-        public IEnumerable<ClientLoan> GetAllClientsLoans()
-        {
-            return FindAll()
-                 .Include(c => c.Client)
-                 .Include(c => c.Loan)
-                .ToList();
-        }
-
-        public ClientLoan GetClientLoanById(long id)
-        {
-            return FindByCondition(c => c.Id == id)
-                .FirstOrDefault();
-        }
-
         public void SaveClientLoan(ClientLoan clientLoan)
         {
             Create(clientLoan);
