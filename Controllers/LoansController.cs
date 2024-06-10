@@ -32,7 +32,7 @@ namespace HomeBanking.Controllers
             string email = User.FindFirst("Client")?.Value ?? string.Empty;
             if (string.IsNullOrEmpty(email))
             {
-                throw new CustomException("Usuario no encontrado", HttpStatusCode.Forbidden);
+                throw new CustomException("Usuario no encontrado", 403);
             }
 
             return _clientService.GetClientByEmail(email);
@@ -51,9 +51,9 @@ namespace HomeBanking.Controllers
                  */
                 return Ok(_loanService.GetAllLoans());
             }
-            catch (Exception e)
+            catch (CustomException e)
             {
-                throw new Exception(e.Message);
+                return StatusCode(e.StatusCode, e.Message);
             }
         }
 
@@ -68,9 +68,9 @@ namespace HomeBanking.Controllers
                 _clientLoanService.AsignLoanToClient(LoanApplicationDTO, clientCurrent);
                 return Ok();
             }
-            catch (Exception e)
+            catch (CustomException e)
             {
-                throw new Exception(e.Message);
+                return StatusCode(e.StatusCode, e.Message);
             }
         }
     }

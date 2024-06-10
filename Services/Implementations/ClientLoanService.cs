@@ -1,6 +1,7 @@
 ﻿using HomeBanking.DTOs;
 using HomeBanking.Models;
 using HomeBanking.Repositories;
+using HomeBanking.Utilities;
 using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 using System.Linq;
@@ -33,12 +34,12 @@ namespace HomeBanking.Services.Implementations
             try
             {
                 // Verificar que el prestamo seleccionado exista
-                var loanFinded = _loanService.GetLoanById(loanApplicationDTO.loanId) ?? throw new Exception("El prestamo no existe.");
+                var loanFinded = _loanService.GetLoanById(loanApplicationDTO.loanId) ?? throw new CustomException("El prestamo no existe", 403);
 
                 // Que el monto NO sea 0 y que no sobrepase el máximo autorizado.
                 if (loanApplicationDTO.Amount <= 0 || loanApplicationDTO.Amount > loanFinded.MaxAmount)
                 {
-                    throw new Exception("El monto es 0 o supera el máximo permitido.");
+                    throw new CustomException("El monto es 0 o supera el máximo permitido", 403);
                 }
 
                 // Que los payments no lleguen vacíos.,
@@ -46,7 +47,7 @@ namespace HomeBanking.Services.Implementations
 
                 if (loanApplicationDTO.Payments.IsNullOrEmpty() || !listPayments.Contains(int.Parse(loanApplicationDTO.Payments)))
                 {
-                    throw new Exception("El payment fue mal asignado.");
+                    throw new CustomException("El payment fue mal asignado", 403);
                 }
 
                 // Que exista la cuenta de destino
@@ -55,7 +56,7 @@ namespace HomeBanking.Services.Implementations
                 // Que la cuenta de destino pertenezca al Cliente autentificado
                 if (accountFinded.ClientId != Client.Id)
                 {
-                    throw new Exception("La cuenta seleccionada no pertenece al mismo cliente.");
+                    throw new CustomException("La cuenta seleccionada no pertenece al mismo cliente", 403);
                 }
 
                 // Cuando guardes clientLoan el monto debes multiplicarlo por el 20 %.
@@ -73,7 +74,7 @@ namespace HomeBanking.Services.Implementations
                 Transaction newTransaction = new Transaction()
                 {
                     Type = TransactionType.CREDIT.ToString(),
-                    Amount = newAmount,
+                    Amount = loanApplicationDTO.Amount,
                     Description = loanFinded.Name + "- Loan approved",
                     Date = DateTime.Now,
                     AccountId = accountFinded.Id
@@ -81,14 +82,13 @@ namespace HomeBanking.Services.Implementations
                 int transSave = _transactionService.SaveTransaction(newTransaction);
 
                 // Actualizar el Balance de la cuenta sumando el monto del préstamo
-                accountFinded.Balance += newAmount;
+                accountFinded.Balance += loanApplicationDTO.Amount;
                 // Guardar la cuenta
                 _accountService.UpdateAccount(accountFinded);
             }
-            catch (Exception e)
+            catch (CustomException e)
 			{
-
-				throw new Exception(e.Message);
+                throw new CustomException(e.Message, 403);
 			}
         }
     }

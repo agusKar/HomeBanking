@@ -33,7 +33,7 @@ namespace HomeBanking.Controllers
             string email = User.FindFirst("Client")?.Value ?? string.Empty;
             if (string.IsNullOrEmpty(email))
             {
-                throw new CustomException("Usuario no encontrado", HttpStatusCode.Forbidden);
+                throw new CustomException("Usuario no encontrado", 403);
             }
 
             return _clientService.GetClientByEmail(email);
@@ -49,7 +49,7 @@ namespace HomeBanking.Controllers
             }
             catch (Exception e)
             {
-                throw new CustomException(e.Message, HttpStatusCode.InternalServerError);
+                throw new CustomException(e.Message, 500);
             }
         }
         
@@ -62,7 +62,7 @@ namespace HomeBanking.Controllers
             }
             catch (Exception e)
             {
-                throw new CustomException(e.Message, HttpStatusCode.InternalServerError);
+                throw new CustomException(e.Message, 500);
             }
         }
         
@@ -77,7 +77,7 @@ namespace HomeBanking.Controllers
             }
             catch (Exception e)
             {
-                throw new CustomException(e.Message, HttpStatusCode.InternalServerError);
+                throw new CustomException(e.Message, 500);
             }
         }
         
@@ -88,7 +88,7 @@ namespace HomeBanking.Controllers
             {
                 Client client = _clientService.GetClientByEmail(newClientDTO.Email);
                 if (client != null) {
-                    throw new CustomException("Usuario ya existe", HttpStatusCode.Forbidden);
+                    throw new CustomException("Usuario ya existe", 403);
                 }
 
                 //guardo cliente y retorno ID
@@ -106,7 +106,7 @@ namespace HomeBanking.Controllers
             }
             catch (Exception e)
             {
-                throw new CustomException(e.Message, HttpStatusCode.InternalServerError);
+                throw new CustomException(e.Message, 500);
             }
         }
 
@@ -124,16 +124,16 @@ namespace HomeBanking.Controllers
                 {
                     Account accountCreated = _accountService.SaveAccount(clientCurrent.Id);
 
-                    return StatusCode(201, new AccountDTO(accountCreated));
+                    return StatusCode(201, new AccountClientDTO(accountCreated));
                 }
                 else
                 {
                     return StatusCode(403,"Este cliente llego al máximo de cuentas");
                 }
             }
-            catch (Exception e)
+            catch (CustomException e)
             {
-                throw new CustomException(e.Message, HttpStatusCode.InternalServerError);
+                return StatusCode(e.StatusCode, e.Message);
             }
         }
         
@@ -158,7 +158,7 @@ namespace HomeBanking.Controllers
             }
             catch (Exception e)
             {
-                throw new CustomException(e.Message, HttpStatusCode.InternalServerError);
+                throw new CustomException(e.Message, 500);
             }
         }
         
@@ -175,9 +175,9 @@ namespace HomeBanking.Controllers
 
                 return Ok(new CardDTO(cardCreated));
             }
-            catch (Exception e)
+            catch (CustomException e)
             {
-                throw new CustomException(e.Message, HttpStatusCode.InternalServerError);
+                return StatusCode(e.StatusCode, e.Message);
             }
         }
         
@@ -200,9 +200,9 @@ namespace HomeBanking.Controllers
 
                 return Ok(cardDto);
             }
-            catch (Exception e)
+            catch (CustomException e)
             {
-                throw new CustomException(e.Message, HttpStatusCode.InternalServerError);
+                return StatusCode(e.StatusCode, e.Message);
             }
         }
     }

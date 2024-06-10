@@ -26,7 +26,7 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new CustomException("Error al traer todas las transacciones", HttpStatusCode.Forbidden);
+                throw new CustomException("Error al traer todas las transacciones", 403);
             }
         }
 
@@ -38,7 +38,7 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new CustomException("Error al traer la transaccion por id", HttpStatusCode.Forbidden);
+                throw new CustomException("Error al traer la transaccion por id", 403);
             }
         }
 
@@ -50,7 +50,7 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new CustomException("Error al guardar la transaccion", HttpStatusCode.Forbidden);
+                throw new CustomException("Error al guardar la transaccion", 403);
             }
         }
         

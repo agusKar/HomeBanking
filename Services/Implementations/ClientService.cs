@@ -31,7 +31,7 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new CustomException("Error al guardar y retornar Id de client", HttpStatusCode.Forbidden);
+                throw new CustomException("Error al guardar y retornar Id de client", 403);
             }
         }
         public Client GetClientByEmail(string email)
@@ -42,7 +42,7 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new CustomException("Error al obtener client por email", HttpStatusCode.Forbidden);
+                throw new CustomException("Error al obtener client por email", 403);
             }
         }
         public IEnumerable<ClientDTO> GetAllClients()
@@ -54,7 +54,7 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new CustomException("Error al obtener todos los clients", HttpStatusCode.Forbidden);
+                throw new CustomException("Error al obtener todos los clients", 403);
             }
         }
         public ClientDTO GetClientById(long id)
@@ -66,7 +66,7 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new CustomException("Error al obtener todos los clients", HttpStatusCode.Forbidden);
+                throw new CustomException("Error al obtener todos los clients", 403);
             }
         }
     }

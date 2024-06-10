@@ -4,8 +4,8 @@ namespace HomeBanking.Utilities
 {
     public class CustomException : Exception
     {
-        public HttpStatusCode StatusCode;
-        public CustomException(string message, HttpStatusCode statusCode) : base(message)
+        public int StatusCode;
+        public CustomException(string message, int statusCode) : base(message)
         {
             StatusCode = statusCode;
         }

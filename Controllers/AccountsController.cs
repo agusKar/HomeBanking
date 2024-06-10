@@ -28,9 +28,9 @@ namespace HomeBanking.Controllers
                 return Ok(accountsDTO);
 
             }
-            catch (Exception e)
+            catch (CustomException e)
             {
-                throw new CustomException(e.Message, HttpStatusCode.InternalServerError);
+                return StatusCode(e.StatusCode, e.Message);
             }
         }
         [HttpGet("{id}")]
@@ -41,9 +41,9 @@ namespace HomeBanking.Controllers
                 var account = _accountService.GetAccountById(id);
                 var accountDTO = new AccountDTO(account);
                 return Ok(accountDTO);
-            } catch (Exception e)
+            } catch (CustomException e)
             {
-                throw new CustomException(e.Message, HttpStatusCode.InternalServerError);
+                return StatusCode(e.StatusCode, e.Message);
             }
         }
     }

@@ -2,6 +2,7 @@
 using HomeBanking.Models;
 using HomeBanking.Repositories;
 using HomeBanking.Services;
+using HomeBanking.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -55,9 +56,9 @@ namespace HomeBanking.Controllers
 
                 return Ok(transferReturnDTO);
             }
-            catch (Exception e)
+            catch (CustomException e)
             {
-                return StatusCode(500, e.Message);
+                return StatusCode(e.StatusCode, e.Message);
             }
         }
 

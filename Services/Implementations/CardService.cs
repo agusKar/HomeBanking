@@ -44,7 +44,7 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new CustomException("Error al obtener todas las cards por client y tipo", HttpStatusCode.Forbidden);
+                throw new CustomException("Error al obtener todas las cards por client y tipo", 403);
             }
         }
         public IEnumerable<Card> GetAllCardsByClient(long clientId)
@@ -55,13 +55,11 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new CustomException("Error al traer todas las card por el id del client", HttpStatusCode.Forbidden);
+                throw new CustomException("Error al traer todas las card por el id del client", 403);
             }
         }
         public Card AddCard(Client currentClient, NewCardDTO newCardDTO)
         {
-            try
-            {
                 // validar de que tipo es y cuantas hay en la base de datos, si son menos de 3 de ese tipo crear una nueva si no devolver
                 var cardByClient = GetAllCardsByType(currentClient.Id, newCardDTO.type);
                 // hacer un metodo para crear la card y crear una clase de customException y hacer throw new customException
@@ -86,18 +84,13 @@ namespace HomeBanking.Services.Implementations
                     }
                     else
                     {
-                        throw new CustomException($"Intentaste crear una tarjeta {newCardDTO.color} del tipo {newCardDTO.type}, pero llegaste al limite.", HttpStatusCode.Forbidden);
+                        throw new CustomException($"Intentaste crear una tarjeta {newCardDTO.color} del tipo {newCardDTO.type}, pero llegaste al limite.", 403);
                     }
                 }
                 else
                 {
-                    throw new CustomException($"Intentaste crear una tarjeta del tipo {newCardDTO.type}, pero llegaste al limite.", HttpStatusCode.Forbidden);
+                    throw new CustomException($"Intentaste crear una tarjeta del tipo {newCardDTO.type}, pero llegaste al limite.", 403);
                 }
-            }
-            catch (Exception e)
-            {
-                throw new CustomException(e.Message, HttpStatusCode.Forbidden);
-            }
         }
     }
 }

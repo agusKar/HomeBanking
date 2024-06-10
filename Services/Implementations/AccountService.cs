@@ -21,7 +21,7 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new CustomException("Error al traer la cuenta por su numero.", HttpStatusCode.Forbidden);
+                throw new CustomException("Error al traer la cuenta por su numero.", 403);
             }
         }
         public int GetCountAccountsByClient(long clientId)
@@ -37,7 +37,7 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new CustomException("Error al traer todas las cuentas.", HttpStatusCode.Forbidden);
+                throw new CustomException("Error al traer todas las cuentas.", 403);
             }
         }
         public string GetRandomAccountNumber()
@@ -67,7 +67,7 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new CustomException("Error al guardar la cuenta.", HttpStatusCode.Forbidden);
+                throw new CustomException("Error al guardar la cuenta.", 403);
             }
         }
         public void UpdateAccount(Account account)
@@ -78,7 +78,7 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new CustomException("Error al modificar la cuenta.", HttpStatusCode.Forbidden);
+                throw new CustomException("Error al modificar la cuenta.", 403);
             }
         }
         public IEnumerable<Account> GetAllAccountsByCliente(long clientId)
@@ -89,7 +89,7 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new CustomException("Error al obtener todos las cuentas.", HttpStatusCode.Forbidden);
+                throw new CustomException("Error al obtener todos las cuentas.", 403);
             }
         }
         public Account GetAccountById(long id)
@@ -100,7 +100,7 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new CustomException("Error al obtener la cuenta por ID.", HttpStatusCode.Forbidden);
+                throw new CustomException("Error al obtener la cuenta por ID.", 403);
             }
         }
     }

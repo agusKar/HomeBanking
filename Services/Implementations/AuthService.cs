@@ -24,7 +24,7 @@ namespace HomeBanking.Services.Implementations
                 //if (user == null || !String.Equals(user.Password, LoginDTO.Password))
                 if(user == null || !BCrypt.Net.BCrypt.Verify(LoginDTO.Password,user.Password))
                 {
-                    throw new Exception("No se encontro al usuario");
+                    throw new CustomException("No se encontro al usuario", 401);
                 }
                 var claims = new List<Claim>
                 {
@@ -45,7 +45,7 @@ namespace HomeBanking.Services.Implementations
             }
 			catch (Exception e)
 			{
-                throw new CustomException(e.Message, HttpStatusCode.Forbidden);
+                throw new CustomException(e.Message, 401);
 			}
         }
     }

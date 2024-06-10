@@ -33,9 +33,9 @@ namespace HomeBanking.Controllers
                     new ClaimsPrincipal(claimsIdentity));
                 return Ok();
             }
-            catch (Exception e)
+            catch (CustomException e)
             {
-                throw new CustomException(e.Message, HttpStatusCode.InternalServerError);
+                return StatusCode(e.StatusCode, e.Message);
             }
         }
         [HttpPost("logout")]
@@ -47,9 +47,9 @@ namespace HomeBanking.Controllers
                 CookieAuthenticationDefaults.AuthenticationScheme);
                 return Ok();
             }
-            catch (Exception e)
+            catch (CustomException e)
             {
-                throw new CustomException(e.Message, HttpStatusCode.InternalServerError);
+                return StatusCode(e.StatusCode, e.Message);
             }
         }
     }
