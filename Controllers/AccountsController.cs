@@ -18,7 +18,8 @@ namespace HomeBanking.Controllers
             _accountService = accountService;
         }
         [HttpGet]
-        [Authorize(Policy = "AdminOnly")]
+        //[Authorize(Policy = "AdminOnly")]
+        [Authorize(Roles = "Admin")]
         public ActionResult GetAllAccounts()
         {
             try

@@ -8,6 +8,7 @@ using HomeBanking.Services.Implementations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -75,7 +76,8 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("ClientOnly", policy => policy.RequireClaim("Client"));
-    options.AddPolicy("AdminOnly", policy => policy.RequireClaim("Admin"));
+    options.AddPolicy("AdminOnly", policy => policy.RequireClaim(ClaimTypes.Role, "Admin"));
+    //options.AddPolicy("AdminOnly", policy => policy.RequireClaim("Admin"));
     options.AddPolicy("TokenOnly", policy =>
     {
         policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);

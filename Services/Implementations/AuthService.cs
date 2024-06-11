@@ -38,7 +38,8 @@ namespace HomeBanking.Services.Implementations
 
                 if (user.Email == "agustin@gmail.com")
                 {
-                    claims.Add(new Claim("Admin", "true"));
+                    claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+                    //claims.Add(new Claim("Admin", "true"));
                 }
 
                 var claimsIdentity = new ClaimsIdentity(
