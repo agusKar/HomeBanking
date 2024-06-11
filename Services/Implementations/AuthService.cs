@@ -67,7 +67,9 @@ namespace HomeBanking.Services.Implementations
                 
                 var claims = new List<Claim>
                 {
-                    new Claim("Client", user.Email)
+                    new Claim("Client", user.Email),
+                    new Claim("Token", "true")
+
                 };
                 if (user.Email == "agustin@gmail.com")
                 {

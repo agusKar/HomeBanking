@@ -83,6 +83,20 @@ namespace HomeBanking.Controllers
                 return StatusCode(e.StatusCode, e.Message);
             }
         }
+        [HttpGet("currentJWT")]
+        [Authorize(Policy = "TokenOnly")]
+        public IActionResult GetCurrentJWT()
+        {
+            try
+            {
+                Client clientCurrent = GetCurrentClient();
+                return Ok(new ClientDTO(clientCurrent));
+            }
+            catch (CustomException e)
+            {
+                return StatusCode(e.StatusCode, e.Message);
+            }
+        }
 
         [HttpPost]
         public IActionResult Post([FromBody] NewClientDTO newClientDTO)
