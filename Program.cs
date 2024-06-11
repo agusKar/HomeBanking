@@ -41,6 +41,9 @@ builder.Services.AddScoped<IClientLoanService, ClientLoanService>();
 
 
 //autenticación
+/*
+ * Especificamos que la autenticación se realizará utilizando el esquema de autenticación de cookies 
+ */
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
       .AddCookie(options =>
       {
@@ -92,7 +95,12 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+/*
+ * Estas 2 lineas se usan para establecer la propiedad HttpContext.User y 
+ * ejecutar el middleware de autorización para las solicitudes
+ */
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapRazorPages();
