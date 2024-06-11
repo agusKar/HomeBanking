@@ -113,7 +113,12 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+/*
+ * Estas 2 lineas se usan para establecer la propiedad HttpContext.User y 
+ * ejecutar el middleware de autorización para las solicitudes
+ */
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapRazorPages();

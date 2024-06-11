@@ -49,9 +49,9 @@ namespace HomeBanking.Controllers
                 var clientsDTO = _clientService.GetAllClients();
                 return Ok(clientsDTO);
             }
-            catch (Exception e)
+            catch (CustomException e)
             {
-                throw new CustomException(e.Message, 500);
+                return StatusCode(e.StatusCode, e.Message);
             }
         }
         
@@ -63,9 +63,9 @@ namespace HomeBanking.Controllers
                 var clientByIdDTO = _clientService.GetClientById(id);
                 return Ok(clientByIdDTO);
             }
-            catch (Exception e)
+            catch (CustomException e)
             {
-                throw new CustomException(e.Message, 500);
+                return StatusCode(e.StatusCode, e.Message);
             }
         }
         
@@ -78,9 +78,9 @@ namespace HomeBanking.Controllers
                 Client clientCurrent = GetCurrentClient();
                 return Ok(new ClientDTO(clientCurrent));
             }
-            catch (Exception e)
+            catch (CustomException e)
             {
-                throw new CustomException(e.Message, 500);
+                return StatusCode(e.StatusCode, e.Message);
             }
         }
 
@@ -100,16 +100,12 @@ namespace HomeBanking.Controllers
                 // creo cuenta usando el servicio
                 _accountService.SaveAccount(ClientCreated.Id);
                 ClientDTO ClientDto = new ClientDTO(ClientCreated);
-                // esto seria para asignarle la cuenta recien creada al cliente y al crearlo se devuelve en el mismo objeto
-                //List<AccountClientDTO> lst = new List<AccountClientDTO>();
-                //lst.Add(new AccountClientDTO(AccountCreated));
-                //ClientDto.Accounts = lst;
-                return StatusCode(201, ClientDto);
 
+                return StatusCode(201, ClientDto);
             }
-            catch (Exception e)
+            catch (CustomException e)
             {
-                throw new CustomException(e.Message, 500);
+                return StatusCode(e.StatusCode, e.Message);
             }
         }
 
@@ -159,9 +155,9 @@ namespace HomeBanking.Controllers
 
                 return Ok(accountsDto);
             }
-            catch (Exception e)
+            catch (CustomException e)
             {
-                throw new CustomException(e.Message, 500);
+                return StatusCode(e.StatusCode, e.Message);
             }
         }
         
