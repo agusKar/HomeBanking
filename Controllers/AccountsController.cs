@@ -34,7 +34,7 @@ namespace HomeBanking.Controllers
             }
         }
         [HttpGet("{id}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "ClientOnly")]
         public ActionResult GetAccount(long id) {
             try
             {
