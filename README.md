@@ -20,7 +20,7 @@ Este es un proyecto que simula un HomeBanking, creado desde 0.
 
 ## 📄 Documentacion
 
-La documentacion de la API, se genero con Swagger, usando la extesion
+La documentacion de la API, se genero con Swagger, usando la url:
 
 **{{URL_LOCAL}}/swagger**
 
