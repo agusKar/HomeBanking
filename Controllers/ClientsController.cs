@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Collections.Generic;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using Microsoft.AspNetCore.Authentication;
 
 namespace HomeBanking.Controllers
 {
@@ -54,6 +56,7 @@ namespace HomeBanking.Controllers
         }
         
         [HttpGet("{id}")]
+        [Authorize(Policy = "AdminOnly")]
         public IActionResult GetClientsById(long id) {
             try
             {
@@ -67,7 +70,7 @@ namespace HomeBanking.Controllers
         }
         
         [HttpGet("current")]
-        [Authorize(Policy = "ClientOnly")]
+        [Authorize(Policy = "AdminOnly")]
         public IActionResult GetCurrent()
         {
             try
@@ -80,7 +83,7 @@ namespace HomeBanking.Controllers
                 throw new CustomException(e.Message, 500);
             }
         }
-        
+
         [HttpPost]
         public IActionResult Post([FromBody] NewClientDTO newClientDTO)
         {

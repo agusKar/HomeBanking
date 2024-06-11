@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using HomeBanking.Services;
 using HomeBanking.Services.Implementations;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,12 +44,30 @@ builder.Services.AddScoped<IClientLoanService, ClientLoanService>();
 
 
 //autenticación
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-      .AddCookie(options =>
-      {
-          options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
-          options.LoginPath = new PathString("/index.html");
-      });
+//builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+//      .AddCookie(options =>
+//      {
+//          options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+//          options.LoginPath = new PathString("/index.html");
+//      });
+
+//Jwt configuration starts here
+var jwtKey = builder.Configuration.GetSection("Jwt:Key").Get<string>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+ .AddJwtBearer(options =>
+ {
+     options.TokenValidationParameters = new TokenValidationParameters
+     {
+         ValidateIssuer = false,
+         ValidateAudience = false,
+         ValidateLifetime = true,
+         ValidateIssuerSigningKey = true,
+         ClockSkew = TimeSpan.Zero,// para que no le agregue 5 minutos por defecto la libreria
+         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+     };
+ });
+//Jwt configuration ends here
 
 //autorización
 builder.Services.AddAuthorization(options =>

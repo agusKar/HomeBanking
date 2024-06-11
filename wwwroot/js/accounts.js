@@ -7,9 +7,13 @@ var app = new Vue({
         errorMsg: null,
     },
     methods:{
-        getData: function(){
+        getData: function () {
             //axios.get("/api/clients/1")
-            axios.get("/api/clients/current")
+            axios.get("/api/clients/current", {
+                headers: {
+                    Authorization: 'Bearer ' + token //the token is a variable which holds the token
+                }
+            })
             .then(function (response) {
                 //get client ifo
                 app.clientInfo = response.data;
