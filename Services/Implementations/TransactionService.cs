@@ -56,55 +56,63 @@ namespace HomeBanking.Services.Implementations
         
         public TransferReturnDTO CreateTransaction(TransferDTO transferDTO, long clientId)
         {
+            try
+            {
             TransferReturnDTO TransfersToReturn = new();
             //Verificar que los parámetros no estén vacíos
             if (transferDTO.Amount == 0 || transferDTO.FromAccountNumber.IsNullOrEmpty() || transferDTO.ToAccountNumber.IsNullOrEmpty() || transferDTO.Description == "")
             {
-                TransfersToReturn.MessageStatusCode = "Los datos no fueron ingresados correctamente.";
-                TransfersToReturn.StatusCode = 403;
-                TransfersToReturn.Transactions = null;
+                //TransfersToReturn.MessageStatusCode = "Los datos no fueron ingresados correctamente.";
+                //TransfersToReturn.StatusCode = 403;
+                //TransfersToReturn.Transactions = null;
+                throw new CustomException("Los datos no fueron ingresados correctamente", 403);
             }
 
             //Verificar que los números de cuenta no sean iguales
             if (transferDTO.FromAccountNumber.IsNullOrEmpty() || transferDTO.ToAccountNumber.IsNullOrEmpty() || transferDTO.ToAccountNumber == transferDTO.FromAccountNumber)
             {
-                TransfersToReturn.MessageStatusCode = "Los datos de cuenta son iguales. Operacion Invalida.";
-                TransfersToReturn.StatusCode = 403;
-                TransfersToReturn.Transactions = null;
+                //TransfersToReturn.MessageStatusCode = "Los datos de cuenta son iguales. Operacion Invalida.";
+                //TransfersToReturn.StatusCode = 403;
+                //TransfersToReturn.Transactions = null;
+                throw new CustomException("Los datos de cuenta son iguales. Operacion Invalida", 403);
             }
 
             //Verificar que exista la cuenta de origen
             var fromAccount = _accountService.GetAccountByNumber(transferDTO.FromAccountNumber);
             if (fromAccount == null)
             {
-                TransfersToReturn.MessageStatusCode = "La cuenta de origen no existe.";
-                TransfersToReturn.StatusCode = 403;
-                TransfersToReturn.Transactions = null;
+                //TransfersToReturn.MessageStatusCode = "La cuenta de origen no existe.";
+                //TransfersToReturn.StatusCode = 403;
+                //TransfersToReturn.Transactions = null;
+                throw new CustomException("La cuenta de origen no existe", 403);
             }
 
             //Verificar que la cuenta de origen pertenezca al cliente autenticado
             if (fromAccount.ClientId != clientId)
             {
-                TransfersToReturn.MessageStatusCode = "La cuenta de origen no pertenece al cliente autenticado.";
-                TransfersToReturn.StatusCode = 403;
-                TransfersToReturn.Transactions = null;
+                //TransfersToReturn.MessageStatusCode = "La cuenta de origen no pertenece al cliente autenticado.";
+                //TransfersToReturn.StatusCode = 403;
+                //TransfersToReturn.Transactions = null;
+                throw new CustomException("La cuenta de origen no pertenece al cliente autenticado", 403);
             }
 
             //Verificar que exista la cuenta de destino
             var toAccount = _accountService.GetAccountByNumber(transferDTO.ToAccountNumber);
             if (toAccount == null)
             {
-                TransfersToReturn.MessageStatusCode = "La cuenta de destino no existe.";
-                TransfersToReturn.StatusCode = 403;
-                TransfersToReturn.Transactions = null;
+                //TransfersToReturn.MessageStatusCode = "La cuenta de destino no existe.";
+                //TransfersToReturn.StatusCode = 403;
+                //TransfersToReturn.Transactions = null;
+                throw new CustomException("La cuenta de destino no existe", 403);
             }
 
             // Verificar que la cuenta de origen tenga el monto disponible.
             if (fromAccount.Balance < transferDTO.Amount)
             {
-                TransfersToReturn.MessageStatusCode = "La cuenta no tiene monto disponible para realizar esta operacion.";
-                TransfersToReturn.StatusCode = 403;
-                TransfersToReturn.Transactions = null;
+                //TransfersToReturn.MessageStatusCode = "La cuenta no tiene monto disponible para realizar esta operacion.";
+                //TransfersToReturn.StatusCode = 403;
+                //TransfersToReturn.Transactions = null;
+                throw new CustomException("La cuenta no tiene monto disponible para realizar esta operacion", 403);
             }
 
             /*
@@ -117,7 +125,7 @@ namespace HomeBanking.Services.Implementations
             {
                 Type = TransactionType.DEBIT.ToString(),
                 Amount = -transferDTO.Amount,
-                Description = transferDTO.FromAccountNumber + "-" + transferDTO.Description,
+                Description = transferDTO.ToAccountNumber + "-" + transferDTO.Description,
                 Date = DateTime.Now,
                 AccountId = fromAccount.Id
             };
@@ -125,7 +133,7 @@ namespace HomeBanking.Services.Implementations
             {
                 Type = TransactionType.CREDIT.ToString(),
                 Amount = transferDTO.Amount,
-                Description = transferDTO.ToAccountNumber + "-" + transferDTO.Description,
+                Description = transferDTO.FromAccountNumber + "-" + transferDTO.Description,
                 Date = DateTime.Now,
                 AccountId = toAccount.Id
 
@@ -164,33 +172,43 @@ namespace HomeBanking.Services.Implementations
                         }
                         else
                         {
-                            TransfersToReturn.MessageStatusCode = "Error en la actualizacion de cuentas.";
-                            TransfersToReturn.StatusCode = 403;
-                            TransfersToReturn.Transactions = null;
+                            //TransfersToReturn.MessageStatusCode = "Error en la actualizacion de cuentas.";
+                            //TransfersToReturn.StatusCode = 403;
+                            //TransfersToReturn.Transactions = null;
+                            throw new CustomException("Error en la actualizacion de cuentas", 403);
                         }
                     }
                     else
                     {
-                        TransfersToReturn.MessageStatusCode = "Error en la carga de transacciones.";
-                        TransfersToReturn.StatusCode = 500;
-                        TransfersToReturn.Transactions = null;
+                        //TransfersToReturn.MessageStatusCode = "Error en la carga de transacciones.";
+                        //TransfersToReturn.StatusCode = 500;
+                        //TransfersToReturn.Transactions = null;
+                        throw new CustomException("Error en la carga de transacciones", 500);
                     }
                 }
                 // dentro de este ELSE se tendria que revertir la primera transaccion
                 else
                 {
-                    TransfersToReturn.MessageStatusCode = "No se pudo cargar la transaccion de destino.";
-                    TransfersToReturn.StatusCode = 500;
-                    TransfersToReturn.Transactions = null;
+                    //TransfersToReturn.MessageStatusCode = "No se pudo cargar la transaccion de destino.";
+                    //TransfersToReturn.StatusCode = 500;
+                    //TransfersToReturn.Transactions = null;
+                    throw new CustomException("No se pudo cargar la transaccion de destino", 500);
                 }
             }
             else
             {
-                TransfersToReturn.MessageStatusCode = "No se pudo cargar la transaccion.";
-                TransfersToReturn.StatusCode = 500;
-                TransfersToReturn.Transactions = null;
+                //TransfersToReturn.MessageStatusCode = "No se pudo cargar la transaccion.";
+                //TransfersToReturn.StatusCode = 500;
+                //TransfersToReturn.Transactions = null;
+                throw new CustomException("No se pudo cargar la transaccion", 500);
             }
             return TransfersToReturn;
+
+            }
+            catch (CustomException e)
+            {
+                throw new CustomException(e.Message, e.StatusCode);
+            }
         }
     }
 }
