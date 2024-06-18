@@ -1,7 +1,8 @@
 
 # 💻 HomeBanking API -  Agustin Karkocki
 
-Este es un proyecto que simula un HomeBanking, creado desde 0.
+Este es un proyecto que simula un HomeBanking, creado desde 0. Tiene autenticacion por Cookies y tambien por JWT.
+
 ## ❇️ Tecnologias usadas
 
 **Client:** Vue & Axios, HTML, CSS

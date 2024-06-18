@@ -42,7 +42,8 @@ namespace HomeBanking.Controllers
         }
 
         [HttpGet]
-        [Authorize(Policy = "AdminOnly")]
+        //[Authorize(Policy = "AdminOnly")]
+        [Authorize(Roles = "Admin")]
         public IActionResult GetAllClients() {
             try
             {
@@ -56,7 +57,8 @@ namespace HomeBanking.Controllers
         }
         
         [HttpGet("{id}")]
-        [Authorize(Policy = "AdminOnly")]
+        //[Authorize(Policy = "AdminOnly")]
+        [Authorize(Roles = "Admin")]
         public IActionResult GetClientsById(long id) {
             try
             {
@@ -70,7 +72,7 @@ namespace HomeBanking.Controllers
         }
         
         [HttpGet("current")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "ClientOnly")]
         public IActionResult GetCurrent()
         {
             try

@@ -74,7 +74,7 @@ namespace HomeBanking.Services.Implementations
                 };
                 if (user.Email == "agustin@gmail.com")
                 {
-                    claims.Add(new Claim("Admin", "true"));
+                    claims.Add(new Claim(ClaimTypes.Role, "Admin"));
                 }
 
                 var Sectoken = new JwtSecurityToken(
