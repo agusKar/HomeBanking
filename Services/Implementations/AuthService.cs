@@ -29,7 +29,7 @@ namespace HomeBanking.Services.Implementations
                 //if (user == null || !String.Equals(user.Password, LoginDTO.Password))
                 if(user == null || !BCrypt.Net.BCrypt.Verify(LoginDTO.Password,user.Password))
                 {
-                    throw new CustomException("No se encontro al usuario", 401);
+                    throw new CustomException("User not Found", 401);
                 }
                 var claims = new List<Claim>
                 {
@@ -61,7 +61,7 @@ namespace HomeBanking.Services.Implementations
                 Client user = _clientService.GetClientByEmail(LoginDTO.Email);
                 if (user == null || !BCrypt.Net.BCrypt.Verify(LoginDTO.Password, user.Password))
                 {
-                    throw new CustomException("No se encontro al usuario", 401);
+                    throw new CustomException("User not Found", 401);
                 }
                 var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
                 var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);

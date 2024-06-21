@@ -2,11 +2,29 @@ var app = new Vue({
     el:"#app",
     data:{
         accountInfo: {},
+        clientInfo: {},
+        isAdmin: false,
         //error: null
         errorToats: null,
         errorMsg: null,
     },
-    methods:{
+    methods: {
+        getDataClient: function () {
+            //axios.get("/api/clients/1")
+            axios.get("/api/clients/current")
+                .then(function (response) {
+                    //get client ifo
+                    app.clientInfo = response.data;
+
+                    app.clientInfo.email == "agustin@gmail.com" ? app.isAdmin = true : app.isAdmin = false; 
+                })
+                .catch(function (error) {
+                    // handle error
+                    //app.error = error;
+                    this.errorMsg = "Error getting data";
+                    this.errorToats.show();
+                })
+        },
         getData: function(){
             const urlParams = new URLSearchParams(window.location.search);
             const id = urlParams.get('id');
@@ -38,5 +56,6 @@ var app = new Vue({
     mounted: function () {
         this.errorToats = new bootstrap.Toast(document.getElementById('danger-toast'));
         this.getData();
+        this.getDataClient();
     }
 })

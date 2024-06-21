@@ -44,7 +44,7 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new CustomException("Error al obtener todas las cards por client y tipo", 403);
+                throw new CustomException("Error getting card by type", 403);
             }
         }
         public IEnumerable<Card> GetAllCardsByClient(long clientId)
@@ -55,7 +55,7 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new CustomException("Error al traer todas las card por el id del client", 403);
+                throw new CustomException("Error getting card by Client ID", 403);
             }
         }
         public Card AddCard(Client currentClient, NewCardDTO newCardDTO)
@@ -84,12 +84,12 @@ namespace HomeBanking.Services.Implementations
                     }
                     else
                     {
-                        throw new CustomException($"Intentaste crear una tarjeta {newCardDTO.color} del tipo {newCardDTO.type}, pero llegaste al limite.", 403);
+                        throw new CustomException($"You try to create a {newCardDTO.color} {newCardDTO.type} card, but you reached the limit.", 403);
                     }
                 }
                 else
                 {
-                    throw new CustomException($"Intentaste crear una tarjeta del tipo {newCardDTO.type}, pero llegaste al limite.", 403);
+                    throw new CustomException($"You try to create a {newCardDTO.type} card, but you reached the limit.", 403);
                 }
         }
     }

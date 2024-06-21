@@ -1,11 +1,8 @@
 ﻿using HomeBanking.Utilities;
 using HomeBanking.Models;
 using HomeBanking.Repositories;
-using System.Net;
 using HomeBanking.DTOs;
 using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
-using System.Runtime.Intrinsics.X86;
 
 namespace HomeBanking.Services.Implementations
 {
@@ -26,7 +23,7 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new CustomException("Error al traer todas las transacciones", 403);
+                throw new CustomException("Error getting all transactions.", 403);
             }
         }
 
@@ -38,7 +35,7 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new CustomException("Error al traer la transaccion por id", 403);
+                throw new CustomException("Error getting transaction by id", 403);
             }
         }
 
@@ -50,7 +47,7 @@ namespace HomeBanking.Services.Implementations
             }
             catch (Exception)
             {
-                throw new CustomException("Error al guardar la transaccion", 403);
+                throw new CustomException("Error saving the transaction.", 403);
             }
         }
         
@@ -65,7 +62,7 @@ namespace HomeBanking.Services.Implementations
                 //TransfersToReturn.MessageStatusCode = "Los datos no fueron ingresados correctamente.";
                 //TransfersToReturn.StatusCode = 403;
                 //TransfersToReturn.Transactions = null;
-                throw new CustomException("Los datos no fueron ingresados correctamente", 403);
+                throw new CustomException("Data incorrect.", 403);
             }
 
             //Verificar que los números de cuenta no sean iguales
@@ -74,7 +71,7 @@ namespace HomeBanking.Services.Implementations
                 //TransfersToReturn.MessageStatusCode = "Los datos de cuenta son iguales. Operacion Invalida.";
                 //TransfersToReturn.StatusCode = 403;
                 //TransfersToReturn.Transactions = null;
-                throw new CustomException("Los datos de cuenta son iguales. Operacion Invalida", 403);
+                throw new CustomException("The account data is the same. Invalid transaction", 403);
             }
 
             //Verificar que exista la cuenta de origen
@@ -84,7 +81,7 @@ namespace HomeBanking.Services.Implementations
                 //TransfersToReturn.MessageStatusCode = "La cuenta de origen no existe.";
                 //TransfersToReturn.StatusCode = 403;
                 //TransfersToReturn.Transactions = null;
-                throw new CustomException("La cuenta de origen no existe", 403);
+                throw new CustomException("The origin account does not exist", 403);
             }
 
             //Verificar que la cuenta de origen pertenezca al cliente autenticado
@@ -93,7 +90,7 @@ namespace HomeBanking.Services.Implementations
                 //TransfersToReturn.MessageStatusCode = "La cuenta de origen no pertenece al cliente autenticado.";
                 //TransfersToReturn.StatusCode = 403;
                 //TransfersToReturn.Transactions = null;
-                throw new CustomException("La cuenta de origen no pertenece al cliente autenticado", 403);
+                throw new CustomException("The origin account does not belong to the user authenticated", 403);
             }
 
             //Verificar que exista la cuenta de destino
@@ -103,7 +100,7 @@ namespace HomeBanking.Services.Implementations
                 //TransfersToReturn.MessageStatusCode = "La cuenta de destino no existe.";
                 //TransfersToReturn.StatusCode = 403;
                 //TransfersToReturn.Transactions = null;
-                throw new CustomException("La cuenta de destino no existe", 403);
+                throw new CustomException("Destination account does not exists.", 403);
             }
 
             // Verificar que la cuenta de origen tenga el monto disponible.
@@ -112,7 +109,7 @@ namespace HomeBanking.Services.Implementations
                 //TransfersToReturn.MessageStatusCode = "La cuenta no tiene monto disponible para realizar esta operacion.";
                 //TransfersToReturn.StatusCode = 403;
                 //TransfersToReturn.Transactions = null;
-                throw new CustomException("La cuenta no tiene monto disponible para realizar esta operacion", 403);
+                throw new CustomException("The account has no amount available to perform this operation.", 403);
             }
 
             /*
@@ -166,7 +163,7 @@ namespace HomeBanking.Services.Implementations
                             _accountService.UpdateAccount(fromAccountDB);
                             _accountService.UpdateAccount(toAccountDB);
 
-                            TransfersToReturn.MessageStatusCode = "Las transacciones se crearon con exito y las cuentas fueron modificadas.";
+                            TransfersToReturn.MessageStatusCode = "Transactions were successfully created and accounts were modified.";
                             TransfersToReturn.StatusCode = 201;
                             TransfersToReturn.Transactions = [new TransactionDTO(fromTransacction), new TransactionDTO(toTransacction)];
                         }
@@ -175,7 +172,7 @@ namespace HomeBanking.Services.Implementations
                             //TransfersToReturn.MessageStatusCode = "Error en la actualizacion de cuentas.";
                             //TransfersToReturn.StatusCode = 403;
                             //TransfersToReturn.Transactions = null;
-                            throw new CustomException("Error en la actualizacion de cuentas", 403);
+                            throw new CustomException("Error in account update", 403);
                         }
                     }
                     else
@@ -183,7 +180,7 @@ namespace HomeBanking.Services.Implementations
                         //TransfersToReturn.MessageStatusCode = "Error en la carga de transacciones.";
                         //TransfersToReturn.StatusCode = 500;
                         //TransfersToReturn.Transactions = null;
-                        throw new CustomException("Error en la carga de transacciones", 500);
+                        throw new CustomException("Error getting transaction.", 500);
                     }
                 }
                 // dentro de este ELSE se tendria que revertir la primera transaccion
@@ -192,7 +189,7 @@ namespace HomeBanking.Services.Implementations
                     //TransfersToReturn.MessageStatusCode = "No se pudo cargar la transaccion de destino.";
                     //TransfersToReturn.StatusCode = 500;
                     //TransfersToReturn.Transactions = null;
-                    throw new CustomException("No se pudo cargar la transaccion de destino", 500);
+                    throw new CustomException("An error occurred", 500);
                 }
             }
             else
@@ -200,7 +197,7 @@ namespace HomeBanking.Services.Implementations
                 //TransfersToReturn.MessageStatusCode = "No se pudo cargar la transaccion.";
                 //TransfersToReturn.StatusCode = 500;
                 //TransfersToReturn.Transactions = null;
-                throw new CustomException("No se pudo cargar la transaccion", 500);
+                throw new CustomException("An error occurred", 500);
             }
             return TransfersToReturn;
 

@@ -3,6 +3,7 @@
     data: {
         clientInfo: {},
         error: null,
+        isAdmin: false,
         creditCards: [],
         debitCards: [],
         errorToats: null,
@@ -10,13 +11,16 @@
     },
     methods: {
         getData: function () {
+            console.log("aca:");
             //axios.get("/api/clients/1")
             axios.get("/api/clients/current")
                 .then(function (response) {
+                    console.log("aca:", response.data);
                     //get client ifo
                     app.clientInfo = response.data;
                     app.creditCards = app.clientInfo.cards.filter(card => card.type == "CREDIT");
                     app.debitCards = app.clientInfo.cards.filter(card => card.type == "DEBIT");
+                    app.clientInfo.email == "agustin@gmail.com" ? app.isAdmin = true : app.isAdmin = false; 
                 })
                 .catch(function (error) {
                     // handle error

@@ -30,12 +30,12 @@ namespace HomeBanking.Controllers
         {
             try
             {
-                Client user = _clientService.GetClientByEmail(LoginDTO.Email);
+                //Client user = _clientService.GetClientByEmail(LoginDTO.Email);
 
-                if (user == null || !BCrypt.Net.BCrypt.Verify(LoginDTO.Password, user.Password))
-                {
-                    throw new CustomException("No se encontro al usuario", 401);
-                }
+                //if (user == null || !BCrypt.Net.BCrypt.Verify(LoginDTO.Password, user.Password))
+                //{
+                //    throw new CustomException("No se encontro al usuario", 401);
+                //}
 
                 string tokenReceived = _authService.GenerateJWT(LoginDTO);
 
@@ -53,13 +53,6 @@ namespace HomeBanking.Controllers
         {
             try
             {
-                Client user = _clientService.GetClientByEmail(LoginDTO.Email);
-
-                //if (user == null || !String.Equals(user.Password, LoginDTO.Password))
-                if (user == null || !BCrypt.Net.BCrypt.Verify(LoginDTO.Password, user.Password))
-                {
-                    throw new CustomException("No se encontro al usuario", 401);
-                }
                 ClaimsIdentity claimsIdentity = _authService.GenerateClaim(LoginDTO);
 
                 await HttpContext.SignInAsync(

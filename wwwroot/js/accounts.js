@@ -2,6 +2,7 @@ var app = new Vue({
     el:"#app",
     data:{
         clientInfo: {},
+        isAdmin: false,
         //error: null
         errorToats: null,
         errorMsg: null,
@@ -9,14 +10,12 @@ var app = new Vue({
     methods:{
         getData: function () {
             //axios.get("/api/clients/1")
-            axios.get("/api/clients/current", {
-                headers: {
-                    Authorization: 'Bearer ' + token //the token is a variable which holds the token
-                }
-            })
+            axios.get("/api/clients/current")
             .then(function (response) {
                 //get client ifo
                 app.clientInfo = response.data;
+
+                app.clientInfo.email == "agustin@gmail.com" ? app.isAdmin = true : app.isAdmin = false; 
             })
             .catch(function (error) {
                 // handle error

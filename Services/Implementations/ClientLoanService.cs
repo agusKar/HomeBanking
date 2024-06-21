@@ -34,12 +34,12 @@ namespace HomeBanking.Services.Implementations
             try
             {
                 // Verificar que el prestamo seleccionado exista
-                var loanFinded = _loanService.GetLoanById(loanApplicationDTO.loanId) ?? throw new CustomException("El prestamo no existe", 403);
+                var loanFinded = _loanService.GetLoanById(loanApplicationDTO.loanId) ?? throw new CustomException("The loan does not exists.", 403);
 
                 // Que el monto NO sea 0 y que no sobrepase el máximo autorizado.
                 if (loanApplicationDTO.Amount <= 0 || loanApplicationDTO.Amount > loanFinded.MaxAmount)
                 {
-                    throw new CustomException("El monto es 0 o supera el máximo permitido", 403);
+                    throw new CustomException("Amount is 0 or exceeds the limit.", 403);
                 }
 
                 // Que los payments no lleguen vacíos.,
@@ -47,16 +47,16 @@ namespace HomeBanking.Services.Implementations
 
                 if (loanApplicationDTO.Payments.IsNullOrEmpty() || !listPayments.Contains(int.Parse(loanApplicationDTO.Payments)))
                 {
-                    throw new CustomException("El payment fue mal asignado", 403);
+                    throw new CustomException("The payment was bad assing.", 403);
                 }
 
                 // Que exista la cuenta de destino
-                var accountFinded = _accountService.GetAccountByNumber(loanApplicationDTO.toAccountNumber) ?? throw new Exception("La cuenta seleccionada no existe.");
+                var accountFinded = _accountService.GetAccountByNumber(loanApplicationDTO.toAccountNumber) ?? throw new Exception("The account does not exists..");
 
                 // Que la cuenta de destino pertenezca al Cliente autentificado
                 if (accountFinded.ClientId != Client.Id)
                 {
-                    throw new CustomException("La cuenta seleccionada no pertenece al mismo cliente", 403);
+                    throw new CustomException("The account does not belong to the same user.", 403);
                 }
 
                 // Cuando guardes clientLoan el monto debes multiplicarlo por el 20 %.

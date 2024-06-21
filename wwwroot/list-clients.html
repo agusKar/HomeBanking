@@ -1,0 +1,235 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous" />
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <title>List Clients</title>
+</head>
+<body>
+    <!--START-->
+    <div id="app">
+        <div class="toast-container position-absolute p-3 top-0 end-0"
+             id="toastPlacement">
+            <div id="danger-toast"
+                 data-bs-delay="2000"
+                 class="toast align-items-center text-white bg-danger border-0"
+                 role="alert"
+                 aria-live="assertive"
+                 aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">{{ errorMsg }}</div>
+                    <button type="button"
+                            class="btn-close btn-close-white me-2 m-auto"
+                            data-bs-dismiss="toast"
+                            aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row h-100">
+                <!--sidebar-->
+                <aside class="col-12 col-md-2 bg-dark py-5">
+                    <div class="position-sticky" style="top: 50px">
+                        <a href="/accounts.html"
+                           class="d-flex align-items-center flex-column mb-3 mb-md-0 me-md-auto link-light text-decoration-none text-center">
+                            <img class="menu-logo" src="img/logo_white.png" />
+                            <br />
+                            <div class="fs-5">Banco Vinotinto</div>
+                        </a>
+                        <hr class="bg-white" />
+                        <ul class="nav nav-pills flex-column mb-auto">
+                            <li class="nav-item mt-2">
+                                <a href="/accounts.html" class="nav-link link-light">
+                                    <i class="bi bi-card-checklist pe-3"></i>
+                                    Accounts
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="/cards.html" class="nav-link link-light">
+                                    <i class="bi bi-credit-card pe-3"></i>
+                                    Cards
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="/transfers.html" class="nav-link link-light">
+                                    <i class="bi bi-box-arrow-right pe-3"></i>
+                                    Transfers
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="/loan-application.html" class="nav-link link-light">
+                                    <i class="bi bi-cash pe-3"></i>
+                                    Loans
+                                </a>
+                            </li>
+                            <li class="nav-item" v-if="isAdmin">
+                                <a href="/list-clients.html" class="nav-link nav-link-active">
+                                    <i class="bi bi-cash pe-3"></i>
+                                    Clients
+                                </a>
+                            </li>
+                        </ul>
+                        <hr class="bg-white" />
+                        <ul class="nav nav-pills flex-column mb-auto">
+                            <li>
+                                <button class="btn btn-danger img-fluid w-100"
+                                        v-on:click="signOut">
+                                    Sign out
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </aside>
+                <!--container-->
+                <div class="col-12 col-md-10 container bg-lightgray p-2 p-md-5">
+                    <h1><b>{{ clientInfo.firstName }} {{ clientInfo.lastName }}</b></h1>
+                    <div class="small-container">
+                        <div class="col">
+                            <div class="row">
+                                <div class="col-12">
+                                    <table class="table table-bordered table-striped mt-3 text-center">
+                                        <thead>
+                                            <tr>
+                                                <th>Full Name</th>
+                                                <th>Email</th>
+                                                <th>Count Account</th>
+                                                <th>Count Cards</th>
+                                                <th>Count Loans</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="client in clients">
+                                                <td>{{client.firstName}} {{client.lastName}}</td>
+                                                <td>{{client.email}}</td>
+                                                <td>{{client.accounts?.length}}</td>
+                                                <td>{{client.cards?.length}}</td>
+                                                <td>{{client.loans?.length}}</td>
+                                                <td>
+                                                    <button v-on:click="getClientById(client.id)">
+                                                        Details
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade"
+             id="seeClient"
+             tabindex="-1"
+             aria-labelledby="seeClientLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="seeClientLabel">Details</h5>
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <h5 class="fw-bold">Client Info</h5>
+                        <ul class="list-unstyled mb-4">
+                            <li>Id: <b>{{clientById.id}}</b></li>
+                            <li>
+                                Fullname:
+                                <b>{{clientById.firstName}} {{clientById.lastName}}</b>
+                            </li>
+                            <li>Email: <b>{{clientById.email}}</b></li>
+                        </ul>
+
+                        <hr />
+                        <h5 class="fw-bold">Accounts</h5>
+                        <table class="table table-striped table-responsive text-center table-secondary">
+                            <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Number</th>
+                                    <th>Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="account in clientById.accounts">
+                                    <td>{{account.id}}</td>
+                                    <td>{{account.number}}</td>
+                                    <td>$ {{account.balance}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="mt-3" v-if="clientById.cards?.length > 0">
+                            <hr />
+                            <h5 class="fw-bold">Cards</h5>
+                            <table class="table table-striped table-responsive text-center table-secondary">
+                                <thead>
+                                    <tr>
+                                        <th>Number</th>
+                                        <th>Color</th>
+                                        <th>Type</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="card in clientById.cards">
+                                        <td>{{card.number}}</td>
+                                        <td>{{card.color}}</td>
+                                        <td>{{card.type}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-3" v-if="clientById.loans?.length > 0">
+                            <hr />
+                            <h5 class="fw-bold">Loans</h5>
+                            <table class="table table-striped table-responsive text-center table-secondary">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Amount</th>
+                                        <th>Payments</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="loan in clientById.loans">
+                                        <td>{{loan.name}}</td>
+                                        <td>$ {{loan.amount}}</td>
+                                        <td>{{loan.payments}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button"
+                                class="btn btn-sm btn-outline-secondary"
+                                data-bs-dismiss="modal">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--END-->
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+            crossorigin="anonymous"></script>
+    <script src="js/client.js"></script>
+</body>
+</html>

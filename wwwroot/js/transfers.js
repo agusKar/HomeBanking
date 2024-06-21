@@ -10,9 +10,24 @@ var app = new Vue({
         accountToNumber: "VIN",
         trasnferType: "own",
         amount: 0,
-        description: ""
+        description: "",
+        clientInfo: {},
+        isAdmin: false
     },
-    methods:{
+    methods: {
+        GetDataClient: function () {
+            //axios.get("/api/clients/1")
+            axios.get("/api/clients/current")
+                .then(function (response) {
+                    app.clientInfo = response.data;
+                    app.clientInfo.email == "agustin@gmail.com" ? app.isAdmin = true : app.isAdmin = false;
+                })
+                .catch(function (error) {
+                    // handle error
+                    this.errorMsg = "Error getting data";
+                    this.errorToats.show();
+                })
+        },
         getData: function(){
             axios.get("/api/clients/current/accounts")
             .then((response) => {
@@ -98,5 +113,6 @@ var app = new Vue({
         this.modal = new bootstrap.Modal(document.getElementById('confirModal'));
         this.okmodal = new bootstrap.Modal(document.getElementById('okModal'));
         this.getData();
+        this.GetDataClient();
     }
 })
