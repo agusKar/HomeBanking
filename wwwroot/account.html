@@ -25,13 +25,13 @@
         <div class="container-fluid">
             <div class="row h-100">
                 <!--sidebar-->
-                <aside class="col-12 col-md-2 bg-dark py-5">
+                <aside class="col-12 col-md-2 py-5" :class="isAdmin ? 'bg-darkblue' : 'bg-dark'">
                     <div class="position-sticky" style="top: 50px;">
                         <a href="/accounts.html"
                            class="d-flex align-items-center flex-column mb-3 mb-md-0 me-md-auto link-light text-decoration-none text-center">
                             <img class="menu-logo" src="img/logo_white.png">
                             <br />
-                            <div class="fs-5">Banco Vinotinto</div>
+                            <div class="fs-5">Banco Vinotinto <br /> <b v-if="isAdmin">ADMINISTRATOR</b></div>
                         </a>
                         <hr class="bg-white">
                         <ul class="nav nav-pills flex-column mb-auto">

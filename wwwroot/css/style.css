@@ -2,6 +2,7 @@
     --primary-color: #28884c;
     --green: #49c549;
     --lightgray: #ebebeb;
+    --darkblue: #2a2a5d;
 }
 html, body{
     height: 100%;
@@ -40,6 +41,9 @@ html, body{
 }
 .bg-lightgray{
     background-color: var(--lightgray);
+}
+.bg-darkblue {
+    background-color: var(--darkblue);
 }
 button, a.button{
     border-radius: 40px!important;
